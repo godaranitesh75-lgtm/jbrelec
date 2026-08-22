@@ -457,18 +457,34 @@ export function Catalogue() {
               <>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                   {cart.map(({ item, qty }) => (
-                    <div key={item} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', background: '#f4f8f6', borderRadius: 10, border: '1px solid #e2eaed' }}>
-                      <span style={{ fontSize: 13, color: 'var(--navy)', fontWeight: 500, flex: 1 }}>{item}</span>
+                    <div key={item} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 14px', background: '#f4f8f6', borderRadius: 10, border: '1px solid #e2eaed' }}>
+                      <span style={{ fontSize: 13, color: 'var(--navy)', fontWeight: 500, flex: 1, lineHeight: 1.4 }}>{item}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                        <button onClick={() => decreaseQty(item)} style={{ width: 26, height: 26, borderRadius: 6, border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
-                          <Minus size={12} />
+                        {/* Decrease */}
+                        <button
+                          onClick={() => decreaseQty(item)}
+                          title="Decrease quantity"
+                          style={{ width: 28, height: 28, borderRadius: 6, border: '1.5px solid #cbd5e1', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontWeight: 900, fontSize: 16 }}
+                        >
+                          <Minus size={13} />
                         </button>
-                        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--navy)', minWidth: 22, textAlign: 'center' }}>{qty}</span>
-                        <button onClick={() => addToCart(item)} style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: 'var(--navy)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                          <Plus size={12} />
+                        {/* Quantity */}
+                        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--navy)', minWidth: 24, textAlign: 'center' }}>{qty}</span>
+                        {/* Increase */}
+                        <button
+                          onClick={() => addToCart(item)}
+                          title="Increase quantity"
+                          style={{ width: 28, height: 28, borderRadius: 6, border: 'none', background: 'var(--navy)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
+                        >
+                          <Plus size={13} />
                         </button>
-                        <button onClick={() => removeFromCart(item)} style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: '#fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e11d48', marginLeft: 2 }}>
-                          <Trash2 size={12} />
+                        {/* Delete */}
+                        <button
+                          onClick={() => removeFromCart(item)}
+                          title="Delete item"
+                          style={{ height: 28, padding: '0 10px', borderRadius: 6, border: 'none', background: '#e11d48', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'white', fontSize: 11, fontWeight: 700, marginLeft: 4 }}
+                        >
+                          <Trash2 size={12} /> Delete
                         </button>
                       </div>
                     </div>
