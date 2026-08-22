@@ -23,12 +23,18 @@ import api from './api.ts';
 const heroImage = 'https://images.pexels.com/photos/28265032/pexels-photo-28265032.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
 
 const categories = [
-  { name: 'General Electrical Accessories', short: 'Everyday essentials', icon: Zap, tone: 'blue' },
-  { name: 'Wiring Accessories', short: 'Reliable installations', icon: Boxes, tone: 'orange' },
-  { name: 'Switches & Sockets', short: 'Control & connection', icon: SlidersHorizontal, tone: 'green' },
-  { name: 'Pipe Accessories', short: 'Neat cable routing', icon: Wrench, tone: 'navy' },
-  { name: 'Fans & Appliances', short: 'Comfort at home', icon: Sparkles, tone: 'sand' },
-  { name: 'Tools & Safety', short: 'Built for the job', icon: ShieldCheck, tone: 'blue' },
+  { name: 'Conduit & Pipe Accessories', short: 'PVC, GI, Flexible conduits', icon: Wrench, tone: 'blue' },
+  { name: 'Cable Management', short: 'Ties, clips, trays, trunking', icon: Boxes, tone: 'orange' },
+  { name: 'Cable Glands', short: 'Brass, PVC, waterproof', icon: ShieldCheck, tone: 'green' },
+  { name: 'Wire & Cable Termination', short: 'Lugs, terminals, ferrules', icon: Zap, tone: 'navy' },
+  { name: 'Wire Connectors & Joining', short: 'Terminal blocks, push-in', icon: SlidersHorizontal, tone: 'sand' },
+  { name: 'Junction & Connection Boxes', short: 'PVC, ABS, waterproof boxes', icon: Sparkles, tone: 'blue' },
+  { name: 'Switch & Socket Accessories', short: 'Modular, surface, concealed', icon: ShieldCheck, tone: 'orange' },
+  { name: 'Electrical Tape & Insulation', short: 'PVC tape, heat-shrink', icon: Wrench, tone: 'green' },
+  { name: 'Wiring Channels & Trunking', short: 'PVC channel, mini trunking', icon: Boxes, tone: 'navy' },
+  { name: 'Cable Tray Accessories', short: 'Perforated, ladder trays', icon: Zap, tone: 'sand' },
+  { name: 'Earthing Wiring Accessories', short: 'Earth clamps, rods, bars', icon: ShieldCheck, tone: 'blue' },
+  { name: 'Panel Wiring Accessories', short: 'DIN rails, busbars, ducts', icon: SlidersHorizontal, tone: 'orange' },
 ];
 
 const galleryProducts = [
@@ -55,7 +61,7 @@ function App() {
   const [search, setSearch] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const navItems = [
-    { label: 'Products', to: '/' },
+    { label: 'Products', to: '/catalogue' },
     { label: 'About', to: '/about' },
     { label: 'Brands', to: '/brands' },
     { label: 'Services', to: '/services' },
@@ -179,7 +185,7 @@ function App() {
 
       </main>
 
-<footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="/about">About JBR</a><a href="#products">Products</a><a href="/services">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="/quote">Request a quote</a><a href="https://wa.me/916377374179" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="/contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Lane, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
+<footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="/about">About JBR</a><a href="/catalogue">Products</a><a href="/services">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="/quote">Request a quote</a><a href="https://wa.me/916377374179" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="/contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Lane, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
   <span>© JBR Electrical. All rights reserved.</span>
   <span>
     Built by{' '}
