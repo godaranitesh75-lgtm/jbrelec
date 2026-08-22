@@ -46,8 +46,8 @@ const galleryProducts = [
   { name: 'Screwdriver Set', image: '/assets/images/screwdriver-set.svg', details: 'Insulated screwdriver set for everyday electrical work.' },
 ];
 
-const whatsappPhone = '919256982263';
-const phoneNumber = '+919256982263';
+const whatsappPhone = '916377374179';
+const phoneNumber = '6377374179';
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,15 +76,13 @@ function App() {
   const submitQuote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const message = [
-      'JBR Electrical enquiry:',
-      `Name: ${quoteName || 'N/A'}`,
-      `Phone: ${quotePhone || 'N/A'}`,
-      `Requirement: ${quoteRequirement || 'N/A'}`,
-    ].join('\n');
+    const subject = encodeURIComponent('JBR Electrical — New Quote Enquiry');
+    const body = encodeURIComponent(
+      `JBR Electrical Enquiry\n\nName: ${quoteName || 'N/A'}\nPhone: ${quotePhone || 'N/A'}\nRequirement: ${quoteRequirement || 'N/A'}`
+    );
 
-    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
-    window.location.href = whatsappUrl;
+    window.location.href = `mailto:jabraram8015@gmail.com?subject=${subject}&body=${body}`;
+    setSubmitted(true);
   };
 
   const openProduct = (product: typeof galleryProducts[number]) => {
@@ -100,7 +98,7 @@ function App() {
       <div className="announcement"><span><Zap size={13} fill="currentColor" /> Quality electrical products <i /> Reliable service <i /> Easy enquiry</span><span className="announcement-location">JBR Electrical, Syed Jung Lane, Troop Bazaar, Koti, Hyderabad</span></div>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="JBR Electrical home">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'Manrope', sans-serif" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Manrope', sans-serif" }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--navy)', letterSpacing: '-.05em' }}>
               JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span>
             </div>
@@ -111,7 +109,7 @@ function App() {
             <Link key={item.label} to={item.to} onClick={() => setMenuOpen(false)}>{item.label}</Link>
           ))}
         </nav>
-        <div className="header-actions"><button className="icon-button" aria-label="Search" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}><Search size={18} /></button><Link className="button button-navy small" to="/login">Login</Link><a className="whatsapp-link" href="https://wa.me/" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a><button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button></div>
+        <div className="header-actions"><button className="icon-button" aria-label="Search" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}><Search size={18} /></button><Link className="button button-navy small" to="/login">Login</Link><a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a><button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button></div>
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button>
       </header>
 
@@ -181,7 +179,7 @@ function App() {
 
       </main>
 
-<footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="#about">About JBR</a><a href="#products">Products</a><a href="#why-jbr">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="#contact">Request a quote</a><a href="https://wa.me/" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="#contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Lane, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
+<footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="/about">About JBR</a><a href="#products">Products</a><a href="/services">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="/quote">Request a quote</a><a href="https://wa.me/916377374179" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="/contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Lane, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
   <span>© JBR Electrical. All rights reserved.</span>
   <span>
     Built by{' '}

@@ -19,6 +19,7 @@ import { CustomerOrderTrack } from './views/CustomerOrderTrack.tsx';
 import { CustomerAddresses } from './views/CustomerAddresses.tsx';
 import { CustomerNotifications } from './views/CustomerNotifications.tsx';
 import { NotFound } from './views/NotFound.tsx';
+import { RequestQuote } from './views/RequestQuote.tsx';
 
 function ProtectedRoute({ roles }: { roles: UserRole[] }) {
   const { user, loading } = useAuth();
@@ -92,6 +93,10 @@ export const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <DeliveryDashboard /> },
     ],
+  },
+  {
+    path: '/quote',
+    element: <RequestQuote />,
   },
   { path: '*', element: <NotFound /> },
 ]);
