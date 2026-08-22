@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, MessageCircle, Phone, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Search, MessageCircle, Phone, ShoppingCart, ArrowRight, Plus, Minus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CATALOGUE = [
@@ -219,9 +219,36 @@ const CATEGORY_COLORS = [
 export function Catalogue() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
-  const [cart, setCart] = useState<string[]>([]);
+  // cart: { item: string, qty: number }[]
+  const [cart, setCart] = useState<{ item: string; qty: number }[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const [enquiredItem, setEnquiredItem] = useState<string | null>(null);
+
+  const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
+
+  function addToCart(item: string) {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.item === item);
+      if (existing) return prev.map((c) => c.item === item ? { ...c, qty: c.qty + 1 } : c);
+      return [...prev, { item, qty: 1 }];
+    });
+  }
+
+  function decreaseQty(item: string) {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.item === item);
+      if (!existing) return prev;
+      if (existing.qty <= 1) return prev.filter((c) => c.item !== item);
+      return prev.map((c) => c.item === item ? { ...c, qty: c.qty - 1 } : c);
+    });
+  }
+
+  function removeFromCart(item: string) {
+    setCart((prev) => prev.filter((c) => c.item !== item));
+  }
+
+  function getQty(item: string) {
+    return cart.find((c) => c.item === item)?.qty ?? 0;
+  }
 
   const filtered = useMemo(() => {
     if (!search.trim()) return CATALOGUE;
@@ -234,25 +261,17 @@ export function Catalogue() {
       .filter((cat) => cat.items.length > 0 || cat.category.toLowerCase().includes(q));
   }, [search]);
 
-  function addToCart(item: string) {
-    if (!cart.includes(item)) setCart((prev) => [...prev, item]);
-  }
-
-  function removeFromCart(item: string) {
-    setCart((prev) => prev.filter((i) => i !== item));
-  }
-
   function sendEnquiry() {
     const subject = encodeURIComponent('JBR Electrical — Product Enquiry / Order');
     const body = encodeURIComponent(
-      `JBR Electrical — Product Enquiry\n\nItems I am interested in:\n${cart.map((i, idx) => `${idx + 1}. ${i}`).join('\n')}\n\nPlease share availability and pricing.\n\nName:\nPhone:\nDelivery Location:`
+      `JBR Electrical — Product Enquiry\n\nItems I am interested in:\n${cart.map((c, idx) => `${idx + 1}. ${c.item}  x${c.qty}`).join('\n')}\n\nPlease share availability and pricing.\n\nName:\nPhone:\nDelivery Location:`
     );
     window.open(`mailto:jabraram8015@gmail.com?subject=${subject}&body=${body}`);
   }
 
   function whatsappEnquiry() {
     const text = encodeURIComponent(
-      `Hello JBR Electrical,\n\nI would like to enquire about the following products:\n${cart.map((i, idx) => `${idx + 1}. ${i}`).join('\n')}\n\nPlease share availability and pricing.`
+      `Hello JBR Electrical,\n\nI would like to order the following products:\n${cart.map((c, idx) => `${idx + 1}. ${c.item}  x${c.qty}`).join('\n')}\n\nPlease share availability and pricing.`
     );
     window.open(`https://wa.me/916377374179?text=${text}`);
   }
@@ -292,7 +311,7 @@ export function Catalogue() {
                 onClick={() => setCartOpen(true)}
                 style={{ background: '#f59e0b', color: '#1c1917', padding: '10px 18px', borderRadius: 8, fontWeight: 800, fontSize: 12, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
               >
-                <ShoppingCart size={15} /> Enquiry Cart ({cart.length})
+                <ShoppingCart size={15} /> Enquiry Cart ({totalItems})
               </button>
             )}
           </div>
@@ -349,7 +368,8 @@ export function Catalogue() {
               {/* Items Grid */}
               <div style={{ padding: '20px 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
                 {cat.items.map((item) => {
-                  const inCart = cart.includes(item);
+                  const qty = getQty(item);
+                  const inCart = qty > 0;
                   return (
                     <div
                       key={item}
@@ -363,27 +383,39 @@ export function Catalogue() {
                         border: `1.5px solid ${inCart ? CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length] : '#e8f0ee'}`,
                         background: inCart ? `color-mix(in srgb, ${CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length]} 6%, white)` : '#f8fbfa',
                         transition: 'all .15s',
-                        cursor: 'pointer',
                       }}
-                      onClick={() => inCart ? removeFromCart(item) : addToCart(item)}
                     >
-                      <span style={{ fontSize: 12, color: inCart ? 'var(--navy)' : '#3d5260', fontWeight: inCart ? 700 : 500, lineHeight: 1.4 }}>
+                      <span style={{ fontSize: 12, color: inCart ? 'var(--navy)' : '#3d5260', fontWeight: inCart ? 700 : 500, lineHeight: 1.4, flex: 1 }}>
                         {search ? (
                           <span dangerouslySetInnerHTML={{
                             __html: item.replace(new RegExp(`(${search})`, 'gi'), '<mark style="background:#fef08a;border-radius:2px;padding:0 1px">$1</mark>')
                           }} />
                         ) : item}
                       </span>
-                      <span style={{
-                        fontSize: 9,
-                        fontWeight: 800,
-                        letterSpacing: '.06em',
-                        textTransform: 'uppercase',
-                        color: inCart ? CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length] : '#a0b4be',
-                        flexShrink: 0,
-                      }}>
-                        {inCart ? '✓ Added' : '+ Add'}
-                      </span>
+                      {inCart ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          <button
+                            onClick={() => decreaseQty(item)}
+                            style={{ width: 22, height: 22, borderRadius: 5, border: `1px solid ${CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length]}`, background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length], padding: 0 }}
+                          >
+                            <Minus size={11} />
+                          </button>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--navy)', minWidth: 18, textAlign: 'center' }}>{qty}</span>
+                          <button
+                            onClick={() => addToCart(item)}
+                            style={{ width: 22, height: 22, borderRadius: 5, border: 'none', background: CATEGORY_COLORS[(cat.id - 1) % CATEGORY_COLORS.length], cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', padding: 0 }}
+                          >
+                            <Plus size={11} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => addToCart(item)}
+                          style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', color: '#a0b4be', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+                        >
+                          + Add
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -423,18 +455,30 @@ export function Catalogue() {
               <p style={{ color: '#6b7f8c', fontSize: 14, textAlign: 'center', padding: '20px 0' }}>No items added yet. Browse the catalogue and click items to add them.</p>
             ) : (
               <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-                  {cart.map((item) => (
-                    <div key={item} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f4f8f6', borderRadius: 10, border: '1px solid #e2eaed' }}>
-                      <span style={{ fontSize: 13, color: 'var(--navy)', fontWeight: 500 }}>{item}</span>
-                      <button onClick={() => removeFromCart(item)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e11d48', fontSize: 12, fontWeight: 700 }}>Remove</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                  {cart.map(({ item, qty }) => (
+                    <div key={item} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', background: '#f4f8f6', borderRadius: 10, border: '1px solid #e2eaed' }}>
+                      <span style={{ fontSize: 13, color: 'var(--navy)', fontWeight: 500, flex: 1 }}>{item}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <button onClick={() => decreaseQty(item)} style={{ width: 26, height: 26, borderRadius: 6, border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
+                          <Minus size={12} />
+                        </button>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--navy)', minWidth: 22, textAlign: 'center' }}>{qty}</span>
+                        <button onClick={() => addToCart(item)} style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: 'var(--navy)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                          <Plus size={12} />
+                        </button>
+                        <button onClick={() => removeFromCart(item)} style={{ width: 26, height: 26, borderRadius: 6, border: 'none', background: '#fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e11d48', marginLeft: 2 }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                <p style={{ fontSize: 12, color: '#6b7f8c', margin: '0 0 16px', lineHeight: 1.6 }}>
-                  Send your enquiry to JBR Electrical and our team will get back with pricing and availability.
-                </p>
+                <div style={{ background: '#f0fdfa', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700, color: 'var(--navy)' }}>
+                  <span>Total items</span>
+                  <span>{cart.length} product{cart.length > 1 ? 's' : ''} · {totalItems} unit{totalItems > 1 ? 's' : ''}</span>
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <button
@@ -494,7 +538,7 @@ export function Catalogue() {
           }}
         >
           <ShoppingCart size={16} />
-          {cart.length} item{cart.length > 1 ? 's' : ''} in cart
+          {cart.length} product{cart.length > 1 ? 's' : ''} · {totalItems} unit{totalItems > 1 ? 's' : ''}
         </button>
       )}
 
