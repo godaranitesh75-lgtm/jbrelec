@@ -1,9 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import {
   ArrowRight,
   BadgeCheck,
-  Boxes,
   CircleCheck,
   FileText,
   Menu,
@@ -11,92 +10,206 @@ import {
   Phone,
   Search,
   ShieldCheck,
-  Sparkles,
-  SlidersHorizontal,
-  Wrench,
   X,
   Zap,
+  Plus,
+  Minus,
+  ShoppingCart,
+  Trash2,
 } from 'lucide-react';
-import { useAuth } from './auth.tsx';
-import api from './api.ts';
+import { GlobalSearchProvider, useGlobalSearch } from './contexts/GlobalSearchContext.tsx';
 
 const heroImage = 'https://images.pexels.com/photos/28265032/pexels-photo-28265032.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
 
-const categories = [
-  { name: 'General Electrical Accessories', short: 'Everyday essentials', icon: Zap, tone: 'blue' },
-  { name: 'Wiring Accessories', short: 'Reliable installations', icon: Boxes, tone: 'orange' },
-  { name: 'Switches & Sockets', short: 'Control & connection', icon: SlidersHorizontal, tone: 'green' },
-  { name: 'Pipe Accessories', short: 'Neat cable routing', icon: Wrench, tone: 'navy' },
-  { name: 'Fans & Appliances', short: 'Comfort at home', icon: Sparkles, tone: 'sand' },
-  { name: 'Tools & Safety', short: 'Built for the job', icon: ShieldCheck, tone: 'blue' },
-];
+export interface CategoryItem {
+  id: number;
+  name: string;
+  items: Product[];
+}
 
-const galleryProducts = [
-  { name: 'Girish Doorbell Box', image: '/assets/images/girish-doorbell-box.svg', details: 'Premium ABS doorbell enclosure for clean wiring and easy installation.' },
-  { name: 'RayVolt MCB Box', image: '/assets/images/rayvolt-mcb-box.svg', details: 'Metal-backed MCB box for compact distribution board installations.' },
-  { name: 'Round Ceiling Speaker', image: '/assets/images/round-ceiling-speaker.svg', details: 'Circular designer speaker cover for false ceilings and recessed wiring.' },
-  { name: '3 Pin Plug', image: '/assets/images/three-pin-plug.svg', details: 'Heavy-duty 3-pin plug with brass terminals for reliable power connection.' },
-  { name: 'Bayonet Holder', image: '/assets/images/bayonet-holder.svg', details: 'Standard bayonet lamp holder suitable for residential lighting.' },
-  { name: 'Multi Plug Adapter', image: '/assets/images/multi-plug-adapter.svg', details: '3-way adapter for powering multiple devices from a single outlet.' },
-  { name: 'Metal Conduit', image: '/assets/images/metal-conduit.svg', details: 'Flexible conduit for protecting electrical wiring runs.' },
-  { name: 'Color Bulb Set', image: '/assets/images/color-bulb-set.svg', details: 'Decorative color bulbs for festive and accent lighting.' },
-  { name: 'Pliers', image: '/assets/images/pliers.svg', details: 'Utility pliers for cutting, gripping and bending wires safely.' },
-  { name: 'Capacitor 1.5uF', image: '/assets/images/capacitor-1-5uf.svg', details: 'Motor-run capacitor rated for 440VAC and high temperature operation.' },
-  { name: 'Classic 2 Pin Plug Top', image: '/assets/images/classic-2-pin-plug-top.svg', details: 'Compact 2-pin plug top with brass pin inserts.' },
-  { name: 'Screwdriver Set', image: '/assets/images/screwdriver-set.svg', details: 'Insulated screwdriver set for everyday electrical work.' },
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  specification: string;
+  size: string;
+  unit: string;
+  price: string;
+  gst: string;
+  stock: string;
+  images: string[];
+  description: string;
+}
+
+export const CATEGORIES: CategoryItem[] = [
+  { id: 1, name: 'Wires, Cables & Wiring Accessories', items: [] },
+  { id: 2, name: 'Switches, Sockets & Modular', items: [] },
+  { id: 3, name: 'Lighting & Fans', items: [] },
+  { id: 4, name: 'MCB, Protection & Distribution', items: [] },
+  { id: 5, name: 'Switchgear, Control & Automation', items: [] },
+  { id: 6, name: 'Earthing & Electrical Safety', items: [] },
+  { id: 7, name: 'Tools & Testing Instruments', items: [] },
+  { id: 8, name: 'Motors, Capacitors & Industrial', items: [] },
+  { id: 9, name: 'Power Backup, Solar & Batteries', items: [] },
+  { id: 10, name: 'Smart, Security & Communication', items: [] },
 ];
 
 const whatsappPhone = '916377374179';
 const phoneNumber = '6377374179';
 
-function App() {
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
+
+function AppInner() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [search, setSearch] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const { query, search: globalSearch } = useGlobalSearch();
+  const [quoteName, setQuoteName] = useState('');
+  const [quotePhone, setQuotePhone] = useState('');
+  const [quoteRequirement, setQuoteRequirement] = useState('');
+  const [quoteAddress, setQuoteAddress] = useState('');
+  const [quoteShopTime, setQuoteShopTime] = useState('');
+  const navigate = useNavigate();
+
+  const [cart, setCart] = useState<{ item: string; qty: number }[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productDetailOpen, setProductDetailOpen] = useState(false);
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  const [deliveryName, setDeliveryName] = useState('');
+  const [deliveryPhone, setDeliveryPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryShopTime, setDeliveryShopTime] = useState('');
+
+  useEffect(() => {
+    fetch(`${API_BASE}/products?limit=3000`)
+      .then((res) => {
+        console.log('[App] products fetch status', res.status);
+        return res.json();
+      })
+      .then((data) => {
+        console.log('[App] products fetch data', data);
+        const mapped: Product[] = (data.products || []).map((p: { id: string; name: string; brand?: { name: string }; sku?: string; description?: string; specifications?: Record<string, unknown>; price?: number; stock?: number; images?: string[] }) => ({
+          id: p.id,
+          name: p.name,
+          brand: p.brand?.name || '',
+          model: p.sku || '',
+          specification: p.specifications ? JSON.stringify(p.specifications) : '',
+          size: '',
+          unit: '',
+          price: String(p.price ?? ''),
+          gst: '',
+          stock: String(p.stock ?? ''),
+          images: p.images || [],
+          description: p.description || '',
+        }));
+        console.log('[App] mapped products', mapped);
+        setDbProducts(mapped);
+        setProductsLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Failed to load products', err);
+        setProductsLoaded(true);
+      });
+  }, []);
+
+  const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
+
+  function addToCart(item: string) {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.item === item);
+      if (existing) return prev.map((c) => c.item === item ? { ...c, qty: c.qty + 1 } : c);
+      return [...prev, { item, qty: 1 }];
+    });
+  }
+
+  function decreaseQty(item: string) {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.item === item);
+      if (!existing) return prev;
+      if (existing.qty <= 1) return prev.filter((c) => c.item !== item);
+      return prev.map((c) => c.item === item ? { ...c, qty: c.qty - 1 } : c);
+    });
+  }
+
+  function removeFromCart(item: string) {
+    setCart((prev) => prev.filter((c) => c.item !== item));
+  }
+
+  function getQty(item: string) {
+    return cart.find((c) => c.item === item)?.qty ?? 0;
+  }
+
+  function setQty(item: string, value: number) {
+    const qty = Math.max(0, Number(value) || 0);
+    setCart((prev) => {
+      const existing = prev.find((c) => c.item === item);
+      if (!existing) {
+        if (qty <= 0) return prev;
+        return [...prev, { item, qty }];
+      }
+      if (qty <= 0) return prev.filter((c) => c.item !== item);
+      return prev.map((c) => c.item === item ? { ...c, qty } : c);
+    });
+  }
+
+  function sendEnquiry() {
+    const subject = encodeURIComponent('JBR Electrical — Product Enquiry / Order');
+    const body = encodeURIComponent(
+      `JBR Electrical — Product Enquiry\n\nItems I am interested in:\n${cart.map((c, idx) => `${idx + 1}. ${c.item}  x${c.qty}`).join('\n')}\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nPlease share availability and pricing.`
+    );
+    window.open(`mailto:jabraram8015@gmail.com?subject=${subject}&body=${body}`);
+  }
+
+  async function whatsappEnquiry() {
+    const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
+    const text = encodeURIComponent(
+      `Hello JBR Electrical,\n\nI have placed an order request with ${cart.length} items (${totalItems} units).\n\nPlease see the attached PDF for the complete list.\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nI will call to confirm this order.`
+    );
+    const { generateOrderPdf } = await import('./utils/pdfGenerator.ts');
+    await generateOrderPdf(cart, phoneNumber);
+    window.open(`https://wa.me/916377374179?text=${text}`);
+  }
+
+  function openProductDetail(product: Product) {
+    setSelectedProduct(product);
+    setProductDetailOpen(true);
+  }
+
+  function closeProductDetail() {
+    setProductDetailOpen(false);
+    setSelectedProduct(null);
+  }
+
   const navItems = [
     { label: 'Products', to: '/' },
-    { label: 'Catalogue', to: '/catalogue' },
+    { label: 'Blog', to: '/blog' },
     { label: 'About', to: '/about' },
     { label: 'Brands', to: '/brands' },
     { label: 'Services', to: '/services' },
     { label: 'Contact', to: '/contact' },
   ];
-  const [quoteName, setQuoteName] = useState('');
-  const [quotePhone, setQuotePhone] = useState('');
-  const [quoteRequirement, setQuoteRequirement] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState<typeof galleryProducts[number] | null>(null);
-  const [buying, setBuying] = useState(false);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const filteredCategories = useMemo(() => categories.filter((category) =>
-    category.name.toLowerCase().includes(search.toLowerCase()) || category.short.toLowerCase().includes(search.toLowerCase())
-  ), [search]);
 
   const submitQuote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const subject = encodeURIComponent('JBR Electrical — New Quote Enquiry');
     const body = encodeURIComponent(
-      `JBR Electrical Enquiry\n\nName: ${quoteName || 'N/A'}\nPhone: ${quotePhone || 'N/A'}\nRequirement: ${quoteRequirement || 'N/A'}`
+      `JBR Electrical Enquiry\n\nName: ${quoteName || 'N/A'}\nPhone: ${quotePhone || 'N/A'}\nDelivery Address: ${quoteAddress || 'N/A'}\nShop Opening Time: ${quoteShopTime || 'N/A'}\nRequirement: ${quoteRequirement || 'N/A'}`
     );
 
     window.location.href = `mailto:jabraram8015@gmail.com?subject=${subject}&body=${body}`;
     setSubmitted(true);
   };
 
-  const openProduct = (product: typeof galleryProducts[number]) => {
-    setSelectedProduct(product);
-  };
-
-  const closeProduct = () => {
-    setSelectedProduct(null);
-  };
-
   return (
     <div className="site-shell">
-      <div className="announcement"><span><Zap size={13} fill="currentColor" /> Quality electrical products <i /> Reliable service <i /> Easy enquiry</span><span className="announcement-location">JBR Electrical, Syed Jung Lane, Troop Bazaar, Koti, Hyderabad</span></div>
+      <div style={{ background: 'var(--navy)', color: 'white', textAlign: 'center', padding: '10px 18px', fontSize: 13, lineHeight: 1.5 }}>
+        <strong>🚀 Full version launching 1st November 2026.</strong> For any inquiry, contact us on <a href="tel:6377374179" style={{ color: '#fbbf24', textDecoration: 'underline' }}>6377374179</a> or <a href="https://wa.me/916377374179" target="_blank" rel="noreferrer" style={{ color: '#fbbf24', textDecoration: 'underline' }}>WhatsApp</a>.
+      </div>
+      <div className="announcement"><span><Zap size={13} fill="currentColor" /> Quality electrical products <i /> Reliable service <i /> Easy enquiry</span><span className="announcement-location">JBR Electrical, Syed Jung Ln, Troop Bazaar, Koti, Hyderabad, Telangana 500001</span></div>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="JBR Electrical home">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Manrope', sans-serif" }}>
@@ -110,38 +223,44 @@ function App() {
             <Link key={item.label} to={item.to} onClick={() => setMenuOpen(false)}>{item.label}</Link>
           ))}
         </nav>
-        <div className="header-actions"><button className="icon-button" aria-label="Search" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}><Search size={18} /></button><Link className="button button-navy small" to="/login">Login</Link><a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a><button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button></div>
+        <div className="header-actions">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const formData = new FormData(event.currentTarget);
+              const value = formData.get('global-search')?.toString().trim() || '';
+              globalSearch(value);
+              navigate(`/catalogue?search=${encodeURIComponent(value)}`);
+              event.currentTarget.reset();
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+          >
+            <div style={{ position: 'relative' }}>
+              <input
+                type="search"
+                name="global-search"
+                placeholder="Search any item..."
+                aria-label="Search any item"
+                defaultValue={query}
+                style={{
+                  width: 220,
+                  padding: '8px 12px 8px 32px',
+                  borderRadius: 6,
+                  border: '1px solid #dce6e8',
+                  background: 'white',
+                  fontSize: 12,
+                  color: 'var(--navy)',
+                  outline: 'none',
+                }}
+              />
+              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#8a9aa5', pointerEvents: 'none' }} />
+            </div>
+          </form>
+          <a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a>
+          <button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button>
+        </div>
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button>
       </header>
-
-      {/* ── SITE NOTICE ── */}
-      <div style={{
-        position: 'sticky',
-        top: 82,
-        zIndex: 19,
-        background: '#f59e0b',
-        borderBottom: '2px solid #d97706',
-        padding: '10px 5.5%',
-        textAlign: 'center',
-        color: '#1c1917',
-        fontSize: 13,
-        fontWeight: 600,
-        lineHeight: 1.6,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 20,
-        flexWrap: 'wrap',
-      }}>
-        <span>
-          🚧 <strong>Website under development.</strong> Full version launching <strong>1st November 2026.</strong> For any inquiry — product availability or pricing — contact us via:
-        </span>
-        <span style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <a href="https://wa.me/916377374179" target="_blank" rel="noreferrer" style={{ background: '#07594c', color: 'white', padding: '4px 14px', borderRadius: 4, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>WhatsApp</a>
-          <a href="tel:6377374179" style={{ background: '#07594c', color: 'white', padding: '4px 14px', borderRadius: 4, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>Call</a>
-          <a href="mailto:jabraram8015@gmail.com" style={{ background: '#07594c', color: 'white', padding: '4px 14px', borderRadius: 4, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>Email</a>
-        </span>
-      </div>
 
       <main id="top">
         <section className="hero section-grid">
@@ -149,10 +268,6 @@ function App() {
             <div className="eyebrow"><span className="eyebrow-line" /> JBR ELECTRICAL <span className="eyebrow-dot" /></div>
             <h1>Powering every connection with <em>quality</em> you can trust.</h1>
             <p className="hero-lede">Reliable electrical products, accessories and solutions for homes, businesses, electricians and projects.</p>
-            <div className="hero-actions"><a className="button button-navy" href="#products">Explore products <ArrowRight size={17} /></a><button className="button button-outline" onClick={() => setQuoteOpen(true)}>Get a quote</button></div>
-            <div className="hero-login-buttons">
-              <Link className="button button-orange" to="/login">Customer Login</Link>
-            </div>
             <div className="hero-note"><BadgeCheck size={18} /> <span>Product availability and pricing may vary. <strong>Ask JBR for current details.</strong></span></div>
           </div>
           <div className="hero-visual">
@@ -163,86 +278,243 @@ function App() {
           </div>
         </section>
 
-        <section className="category-section" id="products"><div className="section-heading"><div><div className="section-kicker">PRODUCT DISCOVERY</div><h2>Everything you need,<br /><span>in one place.</span></h2></div><div className="catalog-search"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products or categories..." aria-label="Search products or categories" /></div></div><div className="category-grid">{filteredCategories.map(({ name, short, icon: Icon, tone }) => <article className={`category-card ${tone}`} key={name}><div className="category-card-top"><span className="category-number">0{filteredCategories.indexOf(categories.find((category) => category.name === name)!) + 1}</span><Icon size={25} /></div><h3>{name}</h3><p>{short}</p><button className="card-arrow" aria-label={`View ${name}`}><ArrowUpRightIcon /></button></article>)}{filteredCategories.length === 0 && <div className="empty-search"><Search size={28} /><h3>Couldn't find exactly that?</h3><p>Ask JBR to help identify or source the right product.</p><button className="text-link" onClick={() => setQuoteOpen(true)}>Ask JBR <ArrowRight size={17} /></button></div>}</div><div className="catalog-footer"><span>Showing categories that make sourcing simpler.</span><a className="text-link" href="#gallery">View all products <ArrowRight size={17} /></a></div></section>
-
-        <section className="gallery-section" id="gallery">
-          <div className="section-heading"><div><div className="section-kicker">PRODUCT GALLERY</div><h2>Shop the full range<br /><span>with product details.</span></h2></div><p className="section-intro">Tap any item to see the full description and technical details directly in the app.</p></div>
-          <div className="gallery-grid">
-            {galleryProducts.map((product) => (
-              <article className="gallery-card" key={product.name} onClick={() => openProduct(product)}>
-                <div className="gallery-image"><img src={product.image} alt={product.name} /></div>
-                <div className="gallery-copy"><strong>{product.name}</strong><p>{product.details}</p></div>
-              </article>
-            ))}
+        {/* ALL PRODUCTS SECTION */}
+        <section className="products-section">
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <div className="section-eyebrow"><span className="section-eyebrow-line" /> ALL PRODUCTS</div>
+              <h2 className="section-heading" style={{ textAlign: 'center', display: 'block' }}>Complete product list</h2>
+              <p className="section-subtitle">
+                All items across every category. Add to cart and send us an enquiry in one click.
+              </p>
+            </div>
+            <div className="products-grid">
+              {(dbProducts.length > 0 ? dbProducts : CATEGORIES.flatMap((cat) => cat.items)).map((product) => {
+                const qty = getQty(product.name);
+                const inCart = qty > 0;
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => openProductDetail(product)}
+                    className={`product-card ${inCart ? 'product-card--active' : ''}`}
+                  >
+                    {product.images && product.images.length > 0 && (
+                      <div className="product-card-image">
+                        <img src={product.images[0]} alt={product.name} />
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                      <span className="product-card-name" style={{ flex: 1 }}>
+                        {product.name}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); decreaseQty(product.name); }}
+                          disabled={qty === 0}
+                          className="qty-button minus"
+                          style={{ opacity: qty === 0 ? 0.4 : 1 }}
+                        >
+                          <Minus size={11} />
+                        </button>
+                        <input
+                          key={`${product.id}-${product.name}-${qty}`}
+                          className="qty-value"
+                          type="text"
+                          inputMode="numeric"
+                          defaultValue={qty}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            e.currentTarget.value = val;
+                          }}
+                          onBlur={(e) => {
+                            const val = parseInt(e.currentTarget.value) || 0;
+                            setQty(product.name, val);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = parseInt((e.target as HTMLInputElement).value) || 0;
+                              setQty(product.name, val);
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          style={{ width: 28, textAlign: 'center', border: 'none', background: 'transparent', fontSize: 14, fontWeight: 800, color: 'var(--navy)', padding: 0 }}
+                        />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); addToCart(product.name); }}
+                          className="qty-button plus"
+                        >
+                          <Plus size={11} />
+                        </button>
+                      </div>
+                    </div>
+                    {(product.description || product.price) && (
+                      <div className="product-card-meta">
+                        {product.description && <span>{product.description}</span>}
+                        {product.price && <span className="product-card-price">Price: ₹{product.price}</span>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="gallery-note">Click any product to open more information.</div>
         </section>
-
       </main>
 
-<footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="/about">About JBR</a><a href="/catalogue">Products</a><a href="/services">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="/quote">Request a quote</a><a href="https://wa.me/916377374179" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="/contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Lane, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
-  <span>© JBR Electrical. All rights reserved.</span>
-  <span>
-    Built by{' '}
-    <a href="https://www.linkedin.com/in/vijay----ramdev/" target="_blank" rel="noreferrer" style={{ color: '#d9e6f4', textDecoration: 'underline' }}>@vijay----ramdev</a>
-    {' '}&amp;{' '}
-    <a href="https://www.linkedin.com/in/nitesh-godara-4473b037a" target="_blank" rel="noreferrer" style={{ color: '#d9e6f4', textDecoration: 'underline' }}>Nitesh Godara</a>
-  </span>
-  <div className="footer-small-note">Delivery partner? <a href="/deliveryboy/login">Login here</a></div>
-</div></footer>
+      {/* ENQUIRY CART MODAL */}
+      {cartOpen && (
+        <div className="modal-backdrop" onClick={() => setCartOpen(false)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Enquiry Cart ({cart.length} items)</h2>
+              <button onClick={() => setCartOpen(false)} className="modal-close">✕</button>
+            </div>
+
+            {cart.length === 0 ? (
+              <p style={{ color: '#6b7f8c', fontSize: 14, textAlign: 'center', padding: '20px 0' }}>No items added yet. Browse categories and click + to add items.</p>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                  {cart.map(({ item, qty }) => (
+                    <div key={item} className="cart-item">
+                      <span className="cart-item-name">{item}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <button onClick={() => decreaseQty(item)} className="qty-button minus"><Minus size={13} /></button>
+                        <input
+                          key={`${item}-${qty}`}
+                          className="qty-value"
+                          type="text"
+                          inputMode="numeric"
+                          defaultValue={qty}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            e.currentTarget.value = val;
+                          }}
+                          onBlur={(e) => {
+                            const val = parseInt(e.currentTarget.value) || 0;
+                            setQty(item, val);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = parseInt((e.target as HTMLInputElement).value) || 0;
+                              setQty(item, val);
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          style={{ width: 28, textAlign: 'center', border: 'none', background: 'transparent', fontSize: 14, fontWeight: 800, color: 'var(--navy)', padding: 0 }}
+                        />
+                        <button onClick={() => addToCart(item)} className="qty-button plus"><Plus size={13} /></button>
+                        <button onClick={() => removeFromCart(item)} style={{ height: 28, padding: '0 10px', borderRadius: 6, border: 'none', background: '#e11d48', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'white', fontSize: 11, fontWeight: 700, marginLeft: 4 }}><Trash2 size={12} /> Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="cart-summary">
+                  <span>Total items</span>
+                  <span>{cart.length} product{cart.length > 1 ? 's' : ''} · {totalItems} unit{totalItems > 1 ? 's' : ''}</span>
+                </div>
+
+                <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#344054', textTransform: 'uppercase', letterSpacing: '.12em' }}>Delivery Details</label>
+                  <input value={deliveryName} onChange={(e) => setDeliveryName(e.target.value)} placeholder="Full name *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  <input value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="Mobile number *" type="tel" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  <textarea value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Delivery address *" required rows={3} style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%', resize: 'vertical' }} />
+                  <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time (e.g. 9:00 AM - 8:00 PM)" style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                </div>
+
+                <div className="cart-actions">
+                  <button onClick={whatsappEnquiry} className="button button-navy">
+                    <MessageCircle size={15} /> Order Now
+                  </button>
+                  <button onClick={sendEnquiry} className="button button-orange">
+                    <ArrowRight size={15} /> Send via Email
+                  </button>
+                  <button onClick={() => setCart([])} style={{ marginTop: 8, background: 'none', border: 'none', color: '#e11d48', fontSize: 12, fontWeight: 700, cursor: 'pointer', width: '100%', textAlign: 'center' }}>
+                    Clear all items
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* PRODUCT DETAIL MODAL */}
+      {productDetailOpen && selectedProduct && (
+        <div className="modal-backdrop" onClick={closeProductDetail}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, padding: 0, overflow: 'hidden' }}>
+            {selectedProduct.images && selectedProduct.images.length > 0 && (
+              <div style={{ width: '100%', background: '#f4f8f6' }}>
+                <img src={selectedProduct.images[0]} alt={selectedProduct.name} style={{ width: '100%', height: 'auto', display: 'block' }} />
+              </div>
+            )}
+
+            <div style={{ padding: '18px 20px 20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Manrope', sans-serif", fontSize: 18, color: 'var(--navy)', margin: '0 0 6px', letterSpacing: '-.02em' }}>{selectedProduct.name}</h2>
+                  <p style={{ margin: 0, color: '#6b7f8c', fontSize: 12 }}>{selectedProduct.description || ''}</p>
+                </div>
+                <button onClick={closeProductDetail} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#6b7f8c', padding: 0, lineHeight: 1 }}>✕</button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+                {selectedProduct.price && <span style={{ background: '#fef3c7', padding: '4px 10px', borderRadius: 6, fontWeight: 700, color: '#92400e', fontSize: 12 }}>₹{selectedProduct.price}</span>}
+              </div>
+
+              <div style={{ marginTop: 18, display: 'flex', gap: 10 }}>
+                <button onClick={() => { addToCart(selectedProduct.name); closeProductDetail(); }} className="button button-navy" style={{ flex: 1, justifyContent: 'center' }}>
+                  <ShoppingCart size={15} /> Add to Enquiry Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING CART BUTTON */}
+      {cart.length > 0 && !cartOpen && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="floating-cart"
+        >
+          <ShoppingCart size={16} />
+          {cart.length} product{cart.length > 1 ? 's' : ''} · {totalItems} unit{totalItems > 1 ? 's' : ''}
+        </button>
+      )}
+
+      <footer className="footer"><div className="footer-main"><div><div style={{ fontSize: 20, fontWeight: 900, color: 'white', letterSpacing: '-.05em', marginBottom: 16, fontFamily: "'Manrope', sans-serif" }}>JBR <span style={{ color: 'var(--orange)' }}>ELECTRICAL</span></div><p>Reliable electrical products and support for homes, businesses, electricians and projects.</p></div><div className="footer-col"><span>Explore</span><a href="/about">About JBR</a><a href="/">Products</a><a href="/services">Why JBR</a></div><div className="footer-col"><span>Need help?</span><a href="/quote">Request a quote</a><a href="https://wa.me/916377374179" target="_blank" rel="noreferrer">WhatsApp JBR</a><a href="/contact">Contact us</a></div><div className="footer-col"><span>Head office</span><strong>JBR Electrical</strong><small>Syed Jung Ln, Troop Bazaar, Koti, Hyderabad, Telangana 500001</small></div></div><div className="footer-bottom">
+        <span>© JBR Electrical. All rights reserved.</span>
+        <span>
+          Built by{' '}
+          <a href="https://www.linkedin.com/in/vijay----ramdev/" target="_blank" rel="noreferrer" style={{ color: '#d9e6f4', textDecoration: 'underline' }}>@vijay----ramdev</a>
+          {' '}&amp;{' '}
+          <a href="https://www.linkedin.com/in/nitesh-godara-4473b037a" target="_blank" rel="noreferrer" style={{ color: '#d9e6f4', textDecoration: 'underline' }}>Nitesh Godara</a>
+        </span>
+        <div className="footer-small-note">Need delivery status updates? Contact us on WhatsApp.</div>
+      </div></footer>
 
       <div className="mobile-bar"><a href={`tel:${phoneNumber}`}><PhoneIcon /> Call</a><a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a><button onClick={() => setQuoteOpen(true)}><FileText size={18} /> Get quote</button></div>
       {quoteOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setQuoteOpen(false); }}><div className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="modal-close" onClick={() => setQuoteOpen(false)} aria-label="Close"><X size={20} /></button>{submitted ? <div className="success-state"><div className="success-icon"><CircleCheck size={28} /></div><h2>Requirement received.</h2><p>Thank you. JBR will review your request and get back to you with the next step.</p><button className="button button-navy" onClick={() => { setQuoteOpen(false); setSubmitted(false); }}>Done</button></div> : <><div className="section-kicker">QUICK ENQUIRY</div><h2 id="quote-title">Tell us what you need.</h2><p className="modal-subtitle">Share a few details and JBR will help you move forward.</p><form onSubmit={submitQuote}>
                 <label>Name<input required value={quoteName} onChange={(event) => setQuoteName(event.target.value)} placeholder="Your name" /></label>
                 <label>Phone number<input required type="tel" value={quotePhone} onChange={(event) => setQuotePhone(event.target.value)} placeholder="Your phone number" /></label>
-                <label>What are you looking for?<textarea required value={quoteRequirement} onChange={(event) => setQuoteRequirement(event.target.value)} placeholder="Product, category or requirement" rows={3} /></label>
+                <label>Delivery address<textarea required value={quoteAddress} onChange={(event) => setQuoteAddress(event.target.value)} placeholder="Full delivery address" rows={3} /></label>
+                <label>Shop opening time<input value={quoteShopTime} onChange={(event) => setQuoteShopTime(event.target.value)} placeholder="e.g. 9:00 AM - 8:00 PM" /></label>
+                <label>What are you looking for?<textarea value={quoteRequirement} onChange={(event) => setQuoteRequirement(event.target.value)} placeholder="Product, category or requirement" rows={3} /></label>
                 <button className="button button-orange" type="submit">Get my quotation <ArrowRight size={17} /></button>
               </form></>}</div></div>}
-      {selectedProduct && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) closeProduct(); }}><div className="product-detail-modal" role="dialog" aria-modal="true" aria-labelledby="product-detail-title"><button className="modal-close" onClick={closeProduct} aria-label="Close"><X size={20} /></button><div className="detail-image"><img src={selectedProduct.image} alt={selectedProduct.name} /></div><div className="detail-copy"><div className="section-kicker">PRODUCT DETAIL</div><h2 id="product-detail-title">{selectedProduct.name}</h2><p>{selectedProduct.details}</p><div className="detail-actions"><button className="button button-navy" onClick={() => { setQuoteOpen(true); closeProduct(); }}>Enquire about this product</button><button className="button button-orange" onClick={async () => {
-                if (!user) {
-                  navigate('/login');
-                  return;
-                }
-                if (!selectedProduct) return;
-                try {
-                  setBuying(true);
-                  const addrRes = await api.get<Array<{ id: string }>>('/api/account/addresses');
-                  const addresses = addrRes.data;
-                  if (!addresses || addresses.length === 0) {
-                    setBuying(false);
-                    if (confirm('No shipping address found. Add one now?')) navigate('/account');
-                    return;
-                  }
-                  const shippingAddressId = addresses[0].id;
-                  const prodRes = await api.get<{ products: Array<{ id: string }> }>(`/api/products?search=${encodeURIComponent(selectedProduct.name)}`);
-                  const found = prodRes.data && prodRes.data.products && prodRes.data.products.length ? prodRes.data.products[0] : null;
-                  const productId = found?.id ?? null;
-                  if (!productId) {
-                    setBuying(false);
-                    alert('Unable to resolve product id for quick-order. Please add to cart instead.');
-                    return;
-                  }
-                  await api.post('/api/orders', { shippingAddressId, items: [{ productId, quantity: 1 }] });
-                  setBuying(false);
-                  alert('Order placed. View your orders in your account.');
-                  navigate('/account/orders');
-                } catch (err: unknown) {
-                  setBuying(false);
-                  if (err instanceof Error) {
-                    alert(err.message);
-                  } else {
-                    alert('Failed to place order');
-                  }
-                }
-              }}>{buying ? 'Ordering...' : 'Order now'}</button><button className="button button-outline" onClick={closeProduct}>Close</button></div></div></div></div>}
     </div>
   );
 }
 
-function ArrowUpRightIcon() { return <ArrowRight size={18} />; }
 function PhoneIcon() { return <Phone size={18} />; }
 
-export default App;
-
-
-
+export default function App() {
+  return (
+    <GlobalSearchProvider>
+      <AppInner />
+    </GlobalSearchProvider>
+  );
+}

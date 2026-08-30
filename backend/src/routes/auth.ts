@@ -75,3 +75,5 @@ authRouter.post('/login', async (req, res, next) => {
 authRouter.post('/logout', (_req, res) => {
   return res.json({ message: 'Logout completed' });
 });
+
+

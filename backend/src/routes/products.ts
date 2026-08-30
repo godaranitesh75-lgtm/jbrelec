@@ -1,8 +1,11 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Router } from 'express';
-import type { AuthenticatedRequest } from '../types.js';
+import { AuthenticatedRequest } from '../types.js';
 import { prisma } from '../libs/prisma.js';
 import { authenticate } from '../middleware/auth.js';
+
+const productCache = new Map<string, { data: unknown; expires: number }>();
+const CACHE_TTL = 5_000;
 
 export const productRouter = Router();
 
@@ -10,7 +13,13 @@ productRouter.get('/', async (req, res, next) => {
   try {
     const { page = '1', limit = '12', search, category, brand } = req.query;
     const pageNumber = Math.max(1, Number(page));
-    const pageSize = Math.min(50, Math.max(1, Number(limit)));
+    const pageSize = Math.min(3000, Math.max(1, Number(limit)));
+
+    const cacheKey = `${pageNumber}:${pageSize}:${search || ''}:${category || ''}:${brand || ''}`;
+    const cached = productCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return res.json(cached.data);
+    }
 
     const where: Prisma.ProductWhereInput = { status: 'ACTIVE' };
 
@@ -29,18 +38,17 @@ productRouter.get('/', async (req, res, next) => {
       where.brand = { slug: brand };
     }
 
-    const [total, products] = await Promise.all([
-      prisma.product.count({ where }),
-      prisma.product.findMany({
-        where,
-        include: { brand: true, category: true },
-        skip: (pageNumber - 1) * pageSize,
-        take: pageSize,
-        orderBy: { updatedAt: 'desc' },
-      }),
-    ]);
+    const products = await prisma.product.findMany({
+      where,
+      include: { brand: { select: { name: true } }, category: { select: { name: true } } },
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+      orderBy: { updatedAt: 'desc' },
+    });
 
-    return res.json({ page: pageNumber, limit: pageSize, total, products });
+    const payload = { page: pageNumber, limit: pageSize, products };
+    productCache.set(cacheKey, { data: payload, expires: Date.now() + CACHE_TTL });
+    return res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -57,6 +65,54 @@ productRouter.get('/slug/:slug', async (req, res, next) => {
       return res.status(404).json({ message: 'Product not found' });
     }
     return res.json(product);
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.get('/categories', async (_req, res, next) => {
+  try {
+    const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+    return res.json({ categories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.delete('/categories/:id', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Category id is required' });
+    }
+
+    const productCount = await prisma.product.count({
+      where: { categoryId: id, status: 'ACTIVE' },
+    });
+
+    if (productCount > 0) {
+      return res.status(400).json({ message: 'Cannot delete category with active products' });
+    }
+
+    await prisma.category.delete({
+      where: { id },
+    });
+
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.get('/brands', async (req, res, next) => {
+  try {
+    const brands = await prisma.brand.findMany({ orderBy: { name: 'asc' } });
+    return res.json({ brands });
   } catch (error) {
     next(error);
   }
@@ -113,3 +169,87 @@ productRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, nex
     next(error);
   }
 });
+
+productRouter.put('/:id', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+    const { sku, name, slug, description, brandId, categoryId, images, price, salePrice, stock, specifications, status } = req.body;
+
+    const updateData: Prisma.ProductUpdateInput = {};
+    if (sku !== undefined) updateData.sku = sku;
+    if (name !== undefined) updateData.name = name;
+    if (slug !== undefined) updateData.slug = slug;
+    if (description !== undefined) updateData.description = description;
+    if (brandId !== undefined) updateData.brand = { connect: { id: brandId } };
+    if (categoryId !== undefined) updateData.category = { connect: { id: categoryId } };
+    if (images !== undefined) updateData.images = images;
+    if (price !== undefined) updateData.price = Number(price);
+    if (salePrice !== undefined) updateData.salePrice = salePrice ? Number(salePrice) : null;
+    if (stock !== undefined) {
+      updateData.stock = Number(stock);
+      updateData.inventory = { update: { available: Number(stock) } };
+    }
+    if (specifications !== undefined) updateData.specifications = specifications ? JSON.parse(specifications) : null;
+    if (status !== undefined) updateData.status = status;
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: updateData,
+      include: { brand: true, category: true, inventory: true },
+    });
+
+    return res.json(product);
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.delete('/:id', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+    await prisma.product.delete({ where: { id } });
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.post('/categories', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { name } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ message: 'Category name is required' });
+    }
+
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const category = await prisma.category.create({
+      data: {
+        name: name.trim(),
+        slug,
+      },
+    });
+
+    return res.status(201).json(category);
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.get('/ping', (_req, res) => res.json({ ping: 'pong' }));
+
+

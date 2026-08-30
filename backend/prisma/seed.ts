@@ -27,6 +27,7 @@ async function run() {
   await prisma.quotation.deleteMany();
 
   const password = await hashPassword('Password123!');
+  const niteshPassword = await hashPassword('Jaatboy@18');
 
   await prisma.user.create({
     data: {
@@ -36,6 +37,17 @@ async function run() {
       role: 'ADMIN',
       status: 'ACTIVE',
       adminProfile: { create: { name: 'JBR Admin', roleTitle: 'Administrator' } },
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      email: 'godaranitesh75@gmail.com',
+      phone: '9000000004',
+      passwordHash: niteshPassword,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      adminProfile: { create: { name: 'Nitesh Godara', roleTitle: 'Administrator' } },
     },
   });
 

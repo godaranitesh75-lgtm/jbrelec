@@ -6,7 +6,6 @@ import {
   Zap,
   Target,
   Heart,
-  CheckCircle,
   TrendingUp,
   MapPin,
 } from 'lucide-react';
@@ -200,7 +199,7 @@ export function About() {
                   lineHeight: 1.8,
                 }}
               >
-                Located at Syed Jung Lane, Troop Bazaar, Koti, we maintain a comprehensive inventory of electrical components, wiring accessories, switches, sockets, and specialized equipment. Our team combines technical expertise with a customer-first approach to deliver solutions that truly matter.
+                Located at Syed Jung Ln, Troop Bazaar, Koti, we maintain a comprehensive inventory of electrical components, wiring accessories, switches, sockets, and specialized equipment. Our team combines technical expertise with a customer-first approach to deliver solutions that truly matter.
               </p>
               <p
                 style={{
@@ -264,7 +263,7 @@ export function About() {
                         lineHeight: 1.7,
                       }}
                     >
-                      Syed Jung Lane, Troop Bazaar, Koti<br />
+                      Syed Jung Ln, Troop Bazaar, Koti<br />
                       Hyderabad, Telangana 500001<br />
                       India
                     </p>

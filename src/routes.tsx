@@ -3,6 +3,7 @@ import type { UserRole } from './auth.tsx';
 import App from './App.tsx';
 import { AuthProvider, useAuth } from './auth.tsx';
 import { AdminDashboard } from './views/AdminDashboard.tsx';
+import { AdminProducts } from './views/AdminProducts.tsx';
 import { About } from './views/About.tsx';
 import { Brands } from './views/Brands.tsx';
 import { Contact } from './views/Contact.tsx';
@@ -21,6 +22,8 @@ import { CustomerNotifications } from './views/CustomerNotifications.tsx';
 import { NotFound } from './views/NotFound.tsx';
 import { RequestQuote } from './views/RequestQuote.tsx';
 import { Catalogue } from './views/Catalogue.tsx';
+import { Blog } from './views/Blog.tsx';
+import { GlobalSearchProvider } from './contexts/GlobalSearchContext.tsx';
 
 function ProtectedRoute({ roles }: { roles: UserRole[] }) {
   const { user, loading } = useAuth();
@@ -66,6 +69,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute roles={['ADMIN']} />,
     children: [
       { path: '', element: <AdminDashboard /> },
+      { path: 'products', element: <AdminProducts /> },
     ],
   },
   {
@@ -100,6 +104,10 @@ export const router = createBrowserRouter([
     element: <Catalogue />,
   },
   {
+    path: '/blog',
+    element: <Blog />,
+  },
+  {
     path: '/quote',
     element: <RequestQuote />,
   },
@@ -108,9 +116,11 @@ export const router = createBrowserRouter([
 
 export function RouterProviderWithAuth() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <GlobalSearchProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </GlobalSearchProvider>
   );
 }
 
