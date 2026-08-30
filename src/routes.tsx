@@ -21,7 +21,6 @@ import { CustomerAddresses } from './views/CustomerAddresses.tsx';
 import { CustomerNotifications } from './views/CustomerNotifications.tsx';
 import { NotFound } from './views/NotFound.tsx';
 import { RequestQuote } from './views/RequestQuote.tsx';
-import { Catalogue } from './views/Catalogue.tsx';
 import { Blog } from './views/Blog.tsx';
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext.tsx';
 
@@ -98,10 +97,6 @@ export const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <DeliveryDashboard /> },
     ],
-  },
-  {
-    path: '/catalogue',
-    element: <Catalogue />,
   },
   {
     path: '/blog',

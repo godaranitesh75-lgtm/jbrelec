@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   ArrowRight,
@@ -64,7 +64,7 @@ function AppInner() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const { query, search: globalSearch } = useGlobalSearch();
+  const { query, setQuery, search: globalSearch } = useGlobalSearch();
   const [quoteName, setQuoteName] = useState('');
   const [quotePhone, setQuotePhone] = useState('');
   const [quoteRequirement, setQuoteRequirement] = useState('');
@@ -82,6 +82,7 @@ function AppInner() {
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryShopTime, setDeliveryShopTime] = useState('');
+  const [deliveryError, setDeliveryError] = useState('');
 
   useEffect(() => {
     fetch(`${API_BASE}/products?limit=3000`)
@@ -156,6 +157,11 @@ function AppInner() {
   }
 
   function sendEnquiry() {
+    if (!deliveryName.trim() || !deliveryPhone.trim() || !deliveryAddress.trim() || !deliveryShopTime.trim()) {
+      setDeliveryError('Please fill all delivery details: name, mobile number, address, and shop opening time.');
+      return;
+    }
+    setDeliveryError('');
     const subject = encodeURIComponent('JBR Electrical — Product Enquiry / Order');
     const body = encodeURIComponent(
       `JBR Electrical — Product Enquiry\n\nItems I am interested in:\n${cart.map((c, idx) => `${idx + 1}. ${c.item}  x${c.qty}`).join('\n')}\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nPlease share availability and pricing.`
@@ -164,6 +170,11 @@ function AppInner() {
   }
 
   async function whatsappEnquiry() {
+    if (!deliveryName.trim() || !deliveryPhone.trim() || !deliveryAddress.trim() || !deliveryShopTime.trim()) {
+      setDeliveryError('Please fill all delivery details: name, mobile number, address, and shop opening time.');
+      return;
+    }
+    setDeliveryError('');
     const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
     const text = encodeURIComponent(
       `Hello JBR Electrical,\n\nI have placed an order request with ${cart.length} items (${totalItems} units).\n\nPlease see the attached PDF for the complete list.\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nI will call to confirm this order.`
@@ -227,11 +238,8 @@ function AppInner() {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const value = formData.get('global-search')?.toString().trim() || '';
-              globalSearch(value);
-              navigate(`/catalogue?search=${encodeURIComponent(value)}`);
-              event.currentTarget.reset();
+              globalSearch(query);
+              navigate(`/?search=${encodeURIComponent(query)}`);
             }}
             style={{ display: 'flex', alignItems: 'center', gap: 8 }}
           >
@@ -241,7 +249,8 @@ function AppInner() {
                 name="global-search"
                 placeholder="Search any item..."
                 aria-label="Search any item"
-                defaultValue={query}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
                 style={{
                   width: 220,
                   padding: '8px 12px 8px 32px',
@@ -289,7 +298,18 @@ function AppInner() {
               </p>
             </div>
             <div className="products-grid">
-              {(dbProducts.length > 0 ? dbProducts : CATEGORIES.flatMap((cat) => cat.items)).map((product) => {
+              {(dbProducts.length > 0 ? dbProducts : CATEGORIES.flatMap((cat) => cat.items))
+                .filter((product) => {
+                  if (!query.trim()) return true;
+                  const q = query.toLowerCase();
+                  return (
+                    product.name.toLowerCase().includes(q) ||
+                    (product.description && product.description.toLowerCase().includes(q)) ||
+                    (product.brand && product.brand.toLowerCase().includes(q)) ||
+                    (product.model && product.model.toLowerCase().includes(q))
+                  );
+                })
+                .map((product) => {
                 const qty = getQty(product.name);
                 const inCart = qty > 0;
                 return (
@@ -421,7 +441,8 @@ function AppInner() {
                   <input value={deliveryName} onChange={(e) => setDeliveryName(e.target.value)} placeholder="Full name *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
                   <input value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="Mobile number *" type="tel" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
                   <textarea value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Delivery address *" required rows={3} style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%', resize: 'vertical' }} />
-                  <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time (e.g. 9:00 AM - 8:00 PM)" style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  {deliveryError && <p style={{ color: '#e11d48', fontSize: 12, margin: 0 }}>{deliveryError}</p>}
                 </div>
 
                 <div className="cart-actions">
