@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.tsx';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 interface Category {
   id: string;

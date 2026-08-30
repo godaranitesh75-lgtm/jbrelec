@@ -58,7 +58,7 @@ export const CATEGORIES: CategoryItem[] = [
 const whatsappPhone = '916377374179';
 const phoneNumber = '6377374179';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 function AppInner() {
   const [menuOpen, setMenuOpen] = useState(false);

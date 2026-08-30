@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, FileText } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 interface BlogPost {
   id: string;
