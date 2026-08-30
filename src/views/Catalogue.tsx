@@ -14,6 +14,7 @@ export function Catalogue() {
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryShopTime, setDeliveryShopTime] = useState('');
+  const [deliveryError, setDeliveryError] = useState('');
 
   const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
 
@@ -77,6 +78,11 @@ export function Catalogue() {
   }
 
   function sendEnquiry() {
+    if (!deliveryName.trim() || !deliveryPhone.trim() || !deliveryAddress.trim() || !deliveryShopTime.trim()) {
+      setDeliveryError('Please fill all delivery details: name, mobile number, address, and shop opening time.');
+      return;
+    }
+    setDeliveryError('');
     const subject = encodeURIComponent('JBR Electrical — Product Enquiry / Order');
     const body = encodeURIComponent(
       `JBR Electrical — Product Enquiry\n\nItems I am interested in:\n${cart.map((c, idx) => `${idx + 1}. ${c.item}  x${c.qty}`).join('\n')}\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nPlease share availability and pricing.`
@@ -85,6 +91,11 @@ export function Catalogue() {
   }
 
   async function whatsappEnquiry() {
+    if (!deliveryName.trim() || !deliveryPhone.trim() || !deliveryAddress.trim() || !deliveryShopTime.trim()) {
+      setDeliveryError('Please fill all delivery details: name, mobile number, address, and shop opening time.');
+      return;
+    }
+    setDeliveryError('');
     const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
     const text = encodeURIComponent(
       `Hello JBR Electrical,\n\nI have placed an order request with ${cart.length} items (${totalItems} units).\n\nPlease see the attached PDF for the complete list.\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nI will call to confirm this order.`
@@ -304,7 +315,8 @@ export function Catalogue() {
                   <input value={deliveryName} onChange={(e) => setDeliveryName(e.target.value)} placeholder="Full name *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
                   <input value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="Mobile number *" type="tel" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
                   <textarea value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Delivery address *" required rows={3} style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%', resize: 'vertical' }} />
-                  <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time (e.g. 9:00 AM - 8:00 PM)" style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  {deliveryError && <p style={{ color: '#e11d48', fontSize: 12, margin: 0 }}>{deliveryError}</p>}
                 </div>
 
                 <div className="cart-actions">
