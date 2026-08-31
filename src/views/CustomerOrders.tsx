@@ -23,10 +23,17 @@ export function CustomerOrders() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/api/orders')
-      .then((response) => setOrders(response.data))
-      .catch(() => setError('Unable to load orders.'))
-      .finally(() => setLoading(false));
+    async function load() {
+      try {
+        const response = await api.get<Order[]>('/api/orders');
+        setOrders(response.data);
+      } catch {
+        setError('Unable to load orders.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   return (

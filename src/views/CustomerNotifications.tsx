@@ -15,10 +15,17 @@ export function CustomerNotifications() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/api/account/notifications')
-      .then((response) => setNotifications(response.data))
-      .catch(() => setError('Unable to load notifications.'))
-      .finally(() => setLoading(false));
+    async function load() {
+      try {
+        const response = await api.get<Notification[]>('/api/account/notifications');
+        setNotifications(response.data);
+      } catch {
+        setError('Unable to load notifications.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   return (

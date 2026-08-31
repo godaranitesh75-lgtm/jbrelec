@@ -18,10 +18,17 @@ export function CustomerAddresses() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/api/account/addresses')
-      .then((response) => setAddresses(response.data))
-      .catch(() => setError('Unable to load saved addresses.'))
-      .finally(() => setLoading(false));
+    async function load() {
+      try {
+        const response = await api.get<Address[]>('/api/account/addresses');
+        setAddresses(response.data);
+      } catch {
+        setError('Unable to load saved addresses.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   return (

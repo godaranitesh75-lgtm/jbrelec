@@ -45,10 +45,17 @@ export function CustomerOrderDetails() {
 
   useEffect(() => {
     if (!id) return;
-    api.get(`/api/orders/${id}`)
-      .then((response) => setOrder(response.data))
-      .catch(() => setError('Unable to load order details.'))
-      .finally(() => setLoading(false));
+    async function load() {
+      try {
+        const response = await api.get<Order>(`/api/orders/${id}`);
+        setOrder(response.data);
+      } catch {
+        setError('Unable to load order details.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, [id]);
 
   const canCancel = order ? ['PENDING', 'CONFIRMED', 'PROCESSING'].includes(order.status) : false;

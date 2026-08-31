@@ -57,10 +57,17 @@ export function CustomerOrderTrack() {
   useEffect(() => {
     if (!id) return;
 
-    api.get(`/api/orders/${id}/tracking`)
-      .then((response) => setTracking(response.data))
-      .catch(() => setError('Unable to load tracking information.'))
-      .finally(() => setLoading(false));
+    async function load() {
+      try {
+        const response = await api.get<TrackingResponse>(`/api/orders/${id}/tracking`);
+        setTracking(response.data);
+      } catch {
+        setError('Unable to load tracking information.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, [id]);
 
   useEffect(() => {

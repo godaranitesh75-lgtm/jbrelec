@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   ArrowRight,
@@ -64,20 +64,18 @@ function AppInner() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const { query, setQuery, search: globalSearch } = useGlobalSearch();
+  const { query, setQuery } = useGlobalSearch();
   const [quoteName, setQuoteName] = useState('');
   const [quotePhone, setQuotePhone] = useState('');
   const [quoteRequirement, setQuoteRequirement] = useState('');
   const [quoteAddress, setQuoteAddress] = useState('');
   const [quoteShopTime, setQuoteShopTime] = useState('');
-  const navigate = useNavigate();
 
   const [cart, setCart] = useState<{ item: string; qty: number }[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
-  const [productsLoaded, setProductsLoaded] = useState(false);
   const [deliveryName, setDeliveryName] = useState('');
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -108,11 +106,9 @@ function AppInner() {
         }));
         console.log('[App] mapped products', mapped);
         setDbProducts(mapped);
-        setProductsLoaded(true);
       })
       .catch((err) => {
         console.error('Failed to load products', err);
-        setProductsLoaded(true);
       });
   }, []);
 
