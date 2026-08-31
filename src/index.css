@@ -78,6 +78,7 @@ button { border: 0; cursor: pointer; }
 .page-links .section-card p { margin: 0 0 20px; color: var(--muted); line-height: 1.7; font-size: 14px; }
 .page-links .section-card .text-link { margin-top: auto; }
 .products-section { background: white; padding: 60px 5.5%; border-top: 1px solid var(--line); }
+.products-search { }
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .product-card { background: white; border-radius: 12px; border: 1px solid var(--line); padding: 16px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s; }
 .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(13,148,136,.08); border-color: #b8d4cf; }

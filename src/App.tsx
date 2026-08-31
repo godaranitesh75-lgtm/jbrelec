@@ -235,36 +235,6 @@ function AppInner() {
           ))}
         </nav>
         <div className="header-actions">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              globalSearch(query);
-              navigate(`/?search=${encodeURIComponent(query)}`);
-            }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-          >
-            <div style={{ position: 'relative' }}>
-              <input
-                type="search"
-                name="global-search"
-                placeholder="Search any item..."
-                aria-label="Search any item"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                style={{
-                  width: 220,
-                  padding: '8px 12px 8px 32px',
-                  borderRadius: 6,
-                  border: '1px solid #dce6e8',
-                  background: 'white',
-                  fontSize: 12,
-                  color: 'var(--navy)',
-                  outline: 'none',
-                }}
-              />
-              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#8a9aa5', pointerEvents: 'none' }} />
-            </div>
-          </form>
           <a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a>
           <button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button>
         </div>
@@ -296,6 +266,29 @@ function AppInner() {
               <p className="section-subtitle">
                 All items across every category. Add to cart and send us an enquiry in one click.
               </p>
+            </div>
+            <div className="products-search" style={{ marginBottom: 24 }}>
+              <div style={{ position: 'relative', maxWidth: 480, margin: '0 auto' }}>
+                <input
+                  type="search"
+                  placeholder="Search products..."
+                  aria-label="Search products"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 40px',
+                    borderRadius: 8,
+                    border: '1.5px solid #e2eaed',
+                    background: 'white',
+                    fontSize: 14,
+                    color: 'var(--navy)',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#8a9aa5', pointerEvents: 'none' }} />
+              </div>
             </div>
             <div className="products-grid">
               {(dbProducts.length > 0 ? dbProducts : CATEGORIES.flatMap((cat) => cat.items))
