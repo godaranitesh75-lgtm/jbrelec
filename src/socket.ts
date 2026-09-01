@@ -6,8 +6,9 @@ export function initSocket() {
   if (socket) return socket;
 
   const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  const base = import.meta.env.VITE_API_BASE_URL
-    ? import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '')
+  const configured = import.meta.env.VITE_API_BASE_URL;
+  const base = configured
+    ? configured.replace(/\/api$/, '')
     : (isLocalhost ? 'http://localhost:4000' : window.location.origin);
 
   socket = clientIo(base, {
