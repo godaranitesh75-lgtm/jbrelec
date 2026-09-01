@@ -250,7 +250,7 @@ function AppInner() {
         </nav>
         <div className="header-actions">
           <a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a>
-          <button className="button button-orange small" onClick={openQuoteModal}>Get a quote <ArrowRight size={16} /></button>
+          <Link className="button button-orange small" to="/quote">Get a quote <ArrowRight size={16} /></Link>
         </div>
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button>
       </header>
