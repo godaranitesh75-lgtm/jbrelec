@@ -7,6 +7,10 @@ import { authenticate } from '../middleware/auth.js';
 const productCache = new Map<string, { data: unknown; expires: number }>();
 const CACHE_TTL = 5_000;
 
+function clearProductCache() {
+  productCache.clear();
+}
+
 export const productRouter = Router();
 
 productRouter.get('/', async (req, res, next) => {
@@ -103,6 +107,7 @@ productRouter.delete('/categories/:id', authenticate, async (req: AuthenticatedR
       where: { id },
     });
 
+    clearProductCache();
     return res.status(204).send();
   } catch (error) {
     next(error);
@@ -164,6 +169,7 @@ productRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, nex
       },
     });
 
+    clearProductCache();
     return res.status(201).json(product);
   } catch (error) {
     next(error);
@@ -203,6 +209,7 @@ productRouter.put('/:id', authenticate, async (req: AuthenticatedRequest, res, n
       include: { brand: true, category: true, inventory: true },
     });
 
+    clearProductCache();
     return res.json(product);
   } catch (error) {
     next(error);
@@ -218,6 +225,7 @@ productRouter.delete('/:id', authenticate, async (req: AuthenticatedRequest, res
 
     const { id } = req.params;
     await prisma.product.delete({ where: { id } });
+    clearProductCache();
     return res.status(204).send();
   } catch (error) {
     next(error);
@@ -244,6 +252,7 @@ productRouter.post('/categories', authenticate, async (req: AuthenticatedRequest
       },
     });
 
+    clearProductCache();
     return res.status(201).json(category);
   } catch (error) {
     next(error);

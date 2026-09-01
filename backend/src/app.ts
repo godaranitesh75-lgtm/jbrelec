@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { authRouter } from './routes/auth.js';
 import { productRouter } from './routes/products.js';
@@ -15,7 +16,15 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const frontendDist = path.resolve(__dirname, '../../dist');
+
+const candidateDistPaths = [
+  path.resolve(__dirname, '../../dist'),
+  path.resolve(__dirname, '../../../dist'),
+  path.resolve(process.cwd(), 'dist'),
+  path.resolve(process.cwd(), '../dist'),
+];
+
+const frontendDist = candidateDistPaths.find((candidate) => existsSync(path.join(candidate, 'index.html'))) ?? candidateDistPaths[0];
 const frontendIndex = path.join(frontendDist, 'index.html');
 const adminProductsHtml = path.resolve(__dirname, '../../admin-products.html');
 

@@ -1,5 +1,5 @@
-import { prisma } from '../src/libs/prisma';
-import { hashPassword } from '../src/services/auth';
+import { prisma } from '../src/libs/prisma.js';
+import { hashPassword } from '../src/services/auth.js';
 
 async function run() {
   await prisma.notification.deleteMany();

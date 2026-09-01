@@ -30,7 +30,7 @@ adminRouter.get('/orders', async (req, res, next) => {
     const { status, search } = req.query;
   const where: Prisma.OrderWhereInput = {};
     if (status && typeof status === 'string') {
-      where.status = status;
+      where.status = status as never;
     }
 
     if (search && typeof search === 'string') {

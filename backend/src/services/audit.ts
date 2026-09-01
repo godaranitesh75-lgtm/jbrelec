@@ -1,8 +1,9 @@
+import type { UserRole } from '@prisma/client';
 import { prisma } from '../libs/prisma.js';
 
 export async function createAudit(payload: {
   actorId: string;
-  actorRole: string;
+  actorRole: UserRole;
   action: string;
   entityType: string;
   entityId: string;
