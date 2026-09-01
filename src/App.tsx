@@ -207,6 +207,16 @@ function AppInner() {
     { label: 'Contact', to: '/contact' },
   ];
 
+  const openQuoteModal = () => {
+    setSubmitted(false);
+    setQuoteName('');
+    setQuotePhone('');
+    setQuoteRequirement('');
+    setQuoteAddress('');
+    setQuoteShopTime('');
+    setQuoteOpen(true);
+  };
+
   const submitQuote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -240,7 +250,7 @@ function AppInner() {
         </nav>
         <div className="header-actions">
           <a className="whatsapp-link" href="https://wa.me/916377374179" target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a>
-          <button className="button button-orange small" onClick={() => setQuoteOpen(true)}>Get a quote <ArrowRight size={16} /></button>
+          <button className="button button-orange small" onClick={openQuoteModal}>Get a quote <ArrowRight size={16} /></button>
         </div>
         <button className="mobile-menu" aria-label="Open menu" onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button>
       </header>
@@ -514,7 +524,7 @@ function AppInner() {
         <div className="footer-small-note">Need delivery status updates? Contact us on WhatsApp.</div>
       </div></footer>
 
-      <div className="mobile-bar"><a href={`tel:${phoneNumber}`}><PhoneIcon /> Call</a><a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a><button onClick={() => setQuoteOpen(true)}><FileText size={18} /> Get quote</button></div>
+      <div className="mobile-bar"><a href={`tel:${phoneNumber}`}><PhoneIcon /> Call</a><a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a><button onClick={openQuoteModal}><FileText size={18} /> Get quote</button></div>
       {quoteOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setQuoteOpen(false); }}><div className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="modal-close" onClick={() => setQuoteOpen(false)} aria-label="Close"><X size={20} /></button>{submitted ? <div className="success-state"><div className="success-icon"><CircleCheck size={28} /></div><h2>Requirement received.</h2><p>Thank you. JBR will review your request and get back to you with the next step.</p><button className="button button-navy" onClick={() => { setQuoteOpen(false); setSubmitted(false); }}>Done</button></div> : <><div className="section-kicker">QUICK ENQUIRY</div><h2 id="quote-title">Tell us what you need.</h2><p className="modal-subtitle">Share a few details and JBR will help you move forward.</p><form onSubmit={submitQuote}>
                 <label>Name<input required value={quoteName} onChange={(event) => setQuoteName(event.target.value)} placeholder="Your name" /></label>
                 <label>Phone number<input required type="tel" value={quotePhone} onChange={(event) => setQuotePhone(event.target.value)} placeholder="Your phone number" /></label>

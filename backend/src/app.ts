@@ -24,8 +24,8 @@ const candidateDistPaths = [
   path.resolve(process.cwd(), '../dist'),
 ];
 
-const frontendDist = candidateDistPaths.find((candidate) => existsSync(path.join(candidate, 'index.html'))) ?? candidateDistPaths[0];
-const frontendIndex = path.join(frontendDist, 'index.html');
+const frontendDist = candidateDistPaths.find((candidate) => existsSync(path.join(candidate, 'index.html')));
+const frontendIndex = frontendDist ? path.join(frontendDist, 'index.html') : null;
 const adminProductsHtml = path.resolve(__dirname, '../../admin-products.html');
 
 export const app = express();
@@ -49,13 +49,27 @@ app.use('/api/admin', adminRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/blog', blogRouter);
 
-app.use(express.static(frontendDist));
+if (frontendDist) {
+  app.use(express.static(frontendDist));
+}
+
 app.get('/admin-products.html', (_req, res) => {
+  if (!existsSync(adminProductsHtml)) {
+    return res.status(404).json({ message: 'Admin HTML file not found.' });
+  }
+
   return res.sendFile(adminProductsHtml);
 });
+
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
+  }
+
+  if (!frontendIndex) {
+    return res.status(404).json({
+      message: 'Frontend build not found. Run the frontend build in the project root before starting the backend.',
+    });
   }
 
   return res.sendFile(frontendIndex);
