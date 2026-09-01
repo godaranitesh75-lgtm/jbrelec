@@ -5,11 +5,10 @@ export let socket: Socket | null = null;
 export function initSocket() {
   if (socket) return socket;
 
-  const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const configured = import.meta.env.VITE_API_BASE_URL;
   const base = configured
     ? configured.replace(/\/api$/, '')
-    : (isLocalhost ? 'http://localhost:4000' : window.location.origin);
+    : 'https://jbrelec.onrender.com';
 
   socket = clientIo(base, {
     auth: {
