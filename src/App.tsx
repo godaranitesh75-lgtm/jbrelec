@@ -124,6 +124,15 @@ function AppInner() {
       });
   }, []);
 
+  useEffect(() => {
+    const modalOpen = cartOpen || quoteOpen || productDetailOpen;
+    const previousOverflow = document.body.style.overflow;
+    if (modalOpen) document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [cartOpen, quoteOpen, productDetailOpen]);
+
   const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
 
   function addToCart(item: string) {
@@ -395,7 +404,7 @@ function AppInner() {
 
       {/* ENQUIRY CART MODAL */}
       {cartOpen && (
-        <div className="modal-backdrop" onClick={() => setCartOpen(false)}>
+        <div className="modal-backdrop modal-backdrop--scrollable" onClick={() => setCartOpen(false)}>
           <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Enquiry Cart ({cart.length} items)</h2>
@@ -529,12 +538,12 @@ function AppInner() {
       </div></footer>
 
       <div className="mobile-bar"><a href={`tel:${phoneNumber}`}><PhoneIcon /> Call</a><a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a><button onClick={openQuoteModal}><FileText size={18} /> Get quote</button></div>
-      {quoteOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setQuoteOpen(false); }}><div className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="modal-close" onClick={() => setQuoteOpen(false)} aria-label="Close"><X size={20} /></button>{submitted ? <div className="success-state"><div className="success-icon"><CircleCheck size={28} /></div><h2>Requirement received.</h2><p>Thank you. JBR will review your request and get back to you with the next step.</p><button className="button button-navy" onClick={() => { setQuoteOpen(false); setSubmitted(false); }}>Done</button></div> : <><div className="section-kicker">QUICK ENQUIRY</div><h2 id="quote-title">Tell us what you need.</h2><p className="modal-subtitle">Share a few details and JBR will help you move forward.</p><form onSubmit={submitQuote}>
+      {quoteOpen && <div className="modal-backdrop modal-backdrop--scrollable" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setQuoteOpen(false); }}><div className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="modal-close" onClick={() => setQuoteOpen(false)} aria-label="Close"><X size={20} /></button>{submitted ? <div className="success-state"><div className="success-icon"><CircleCheck size={28} /></div><h2>Requirement received.</h2><p>Thank you. JBR will review your request and get back to you with the next step.</p><button className="button button-navy" onClick={() => { setQuoteOpen(false); setSubmitted(false); }}>Done</button></div> : <><div className="section-kicker">QUICK ENQUIRY</div><h2 id="quote-title">Tell us what you need.</h2><p className="modal-subtitle">Share a few details and JBR will help you move forward.</p><form className="quote-form" onSubmit={submitQuote}>
                 <label>Name<input required value={quoteName} onChange={(event) => setQuoteName(event.target.value)} placeholder="Your name" /></label>
                 <label>Phone number<input required type="tel" value={quotePhone} onChange={(event) => setQuotePhone(event.target.value)} placeholder="Your phone number" /></label>
                 <label>Delivery address<textarea required value={quoteAddress} onChange={(event) => setQuoteAddress(event.target.value)} placeholder="Full delivery address" rows={3} /></label>
                 <label>Shop opening time<input value={quoteShopTime} onChange={(event) => setQuoteShopTime(event.target.value)} placeholder="e.g. 9:00 AM - 8:00 PM" /></label>
-                <label>What are you looking for?<textarea value={quoteRequirement} onChange={(event) => setQuoteRequirement(event.target.value)} placeholder="Product, category or requirement" rows={3} /></label>
+            <label>Description<textarea required value={quoteRequirement} onChange={(event) => setQuoteRequirement(event.target.value)} placeholder="Describe the products or work you need" rows={4} /></label>
                 <button className="button button-orange" type="submit">Get my quotation <ArrowRight size={17} /></button>
               </form></>}</div></div>}
     </div>
