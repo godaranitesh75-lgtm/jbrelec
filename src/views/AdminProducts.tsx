@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.tsx';
 
 const getApiBaseUrl = () => {
-  const configured = import.meta.env.VITE_API_BASE_URL;
-  if (configured) return configured;
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '');
+  if (configured) return configured.endsWith('/api') ? configured : `${configured}/api`;
 
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {

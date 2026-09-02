@@ -59,15 +59,15 @@ const whatsappPhone = '916377374179';
 const phoneNumber = '6377374179';
 
 const getApiBaseUrl = () => {
-  const configured = import.meta.env.VITE_API_BASE_URL;
-  if (configured) return configured;
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '');
+  if (configured) return configured.endsWith('/api') ? configured : `${configured}/api`;
 
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
     return 'http://localhost:4000/api';
   }
 
-  return 'https://jbrelec.onrender.com';
+  return 'https://jbrelec.onrender.com/api';
 };
 
 const API_BASE = getApiBaseUrl();
