@@ -53,7 +53,7 @@ if (frontendDist) {
   app.use(express.static(frontendDist));
 }
 
-app.get('/admin-products.html', (_req, res) => {
+app.get(['/admin-products.html', '/admin-products', '/admin-panel'], (_req, res) => {
   if (!existsSync(adminProductsHtml)) {
     return res.status(404).json({ message: 'Admin HTML file not found.' });
   }

@@ -12,7 +12,7 @@ interface User {
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
 }
 
@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('jbr_token', token);
     localStorage.setItem('jbr_user', JSON.stringify(loggedUser));
     setUser(loggedUser);
+    return loggedUser;
   };
 
   const logout = () => {

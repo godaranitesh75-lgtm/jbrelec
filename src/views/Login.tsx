@@ -12,7 +12,18 @@ export function Login() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await login(email, password);
+      const loggedUser = await login(email, password);
+
+      if (loggedUser.role === 'ADMIN' || loggedUser.role === 'STAFF') {
+        navigate('/admin');
+        return;
+      }
+
+      if (loggedUser.role === 'DELIVERY_BOY') {
+        navigate('/deliveryboy/dashboard');
+        return;
+      }
+
       navigate('/account');
     } catch {
       setError('Login failed. Please check your email and password.');

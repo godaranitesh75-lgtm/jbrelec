@@ -30,6 +30,19 @@ blogRouter.get('/:slug', async (req, res, next) => {
   }
 });
 
+blogRouter.get('/admin/:id', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.blogPost.findUnique({ where: { id } });
+    if (!post) {
+      return res.status(404).json({ message: 'Blog post not found' });
+    }
+    return res.json(post);
+  } catch (error) {
+    next(error);
+  }
+});
+
 blogRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, next) => {
   try {
     const { title, slug, excerpt, content, coverImage, published, publishedAt } = req.body;

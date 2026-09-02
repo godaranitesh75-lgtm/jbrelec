@@ -123,6 +123,63 @@ productRouter.get('/brands', async (req, res, next) => {
   }
 });
 
+productRouter.post('/brands', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { name } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ message: 'Brand name is required' });
+    }
+
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const brand = await prisma.brand.create({
+      data: {
+        name: name.trim(),
+        slug,
+      },
+    });
+
+    return res.status(201).json(brand);
+  } catch (error) {
+    next(error);
+  }
+});
+
+productRouter.delete('/brands/:id', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Brand id is required' });
+    }
+
+    const productCount = await prisma.product.count({
+      where: { brandId: id },
+    });
+
+    if (productCount > 0) {
+      return res.status(400).json({ message: 'Cannot delete brand with associated products' });
+    }
+
+    await prisma.brand.delete({
+      where: { id },
+    });
+
+    clearProductCache();
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
 productRouter.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;

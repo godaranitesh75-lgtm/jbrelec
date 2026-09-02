@@ -4,6 +4,11 @@ const getApiBaseUrl = () => {
   const configured = import.meta.env.VITE_API_BASE_URL;
   if (configured) return configured;
 
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
+    return 'http://localhost:4000/api';
+  }
+
   return 'https://jbrelec.onrender.com/api';
 };
 

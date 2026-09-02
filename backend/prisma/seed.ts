@@ -75,10 +75,11 @@ async function run() {
 
   const customers = [];
   for (let i = 1; i <= 5; i += 1) {
+    const customerPhone = `90000001${i + 0}0`;
     const customer = await prisma.user.create({
       data: {
         email: `customer${i}@jbrelectrical.com`,
-        phone: `900000000${3 + i}`,
+        phone: customerPhone,
         passwordHash: password,
         role: 'CUSTOMER',
         status: 'ACTIVE',
