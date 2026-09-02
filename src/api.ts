@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
     return 'http://localhost:4000/api';
   }
 
-  return 'https://jbrelec.onrender.com';
+  return 'https://jbrelec.onrender.com/products';
 };
 
 const api = axios.create({
