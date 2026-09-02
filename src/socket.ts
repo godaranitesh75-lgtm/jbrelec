@@ -11,7 +11,7 @@ export function initSocket() {
     ? configured.replace(/\/api$/, '')
     : hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')
       ? 'http://localhost:4000'
-      : 'https://jbrelec.onrender.com/products';
+      : 'https://jbrelec.onrender.com';
 
   socket = clientIo(base, {
     auth: {
