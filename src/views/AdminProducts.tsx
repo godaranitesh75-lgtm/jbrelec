@@ -15,6 +15,7 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE = getApiBaseUrl();
+const MAX_PRODUCT_IMAGES = 5;
 
 interface Category {
   id: string;
@@ -119,7 +120,16 @@ export function AdminProducts() {
   }
 
   function processFiles(files: File[]) {
-    const readers = files.map((file) => {
+    const availableSlots = MAX_PRODUCT_IMAGES - images.length;
+    if (availableSlots <= 0) {
+      setMessage({ type: 'error', text: `A product can have a maximum of ${MAX_PRODUCT_IMAGES} images.` });
+      return;
+    }
+    const selectedFiles = files.slice(0, availableSlots);
+    if (files.length > selectedFiles.length) {
+      setMessage({ type: 'error', text: `Only ${MAX_PRODUCT_IMAGES} images are allowed per product.` });
+    }
+    const readers = selectedFiles.map((file) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onload = (ev) => resolve(ev.target?.result as string);
@@ -127,7 +137,7 @@ export function AdminProducts() {
       });
     });
     Promise.all(readers).then((results) => {
-      setImages((prev) => [...prev, ...results]);
+      setImages((prev) => [...prev, ...results].slice(0, MAX_PRODUCT_IMAGES));
     });
   }
 
@@ -220,7 +230,7 @@ export function AdminProducts() {
       });
 
       if (product.images && product.images.length > 0) {
-        setImages(product.images);
+        setImages(product.images.slice(0, MAX_PRODUCT_IMAGES));
       } else {
         setImages([]);
       }
@@ -449,7 +459,7 @@ export function AdminProducts() {
               >
                 <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
                 <p style={{ margin: 0, fontWeight: 700, color: '#0f3d3a' }}>Drop product photos here</p>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7f8c' }}>or click to browse from your device</p>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7f8c' }}>Select up to {MAX_PRODUCT_IMAGES} images from your device</p>
                 <input
                   id="adminImages"
                   type="file"
@@ -466,6 +476,7 @@ export function AdminProducts() {
                   ))}
                 </div>
               )}
+              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6b7f8c' }}>{images.length}/{MAX_PRODUCT_IMAGES} images selected</p>
             </label>
 
             <button type="submit" disabled={saving} style={{ padding: '12px 16px', borderRadius: 8, border: 'none', background: '#0d9488', color: 'white', fontWeight: 800, cursor: 'pointer' }}>

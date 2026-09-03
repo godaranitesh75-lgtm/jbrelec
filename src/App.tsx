@@ -86,12 +86,14 @@ function AppInner() {
   const [cart, setCart] = useState<{ item: string; qty: number }[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [deliveryName, setDeliveryName] = useState('');
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryShopTime, setDeliveryShopTime] = useState('');
+  const [shopImage, setShopImage] = useState('');
   const [deliveryError, setDeliveryError] = useState('');
 
   useEffect(() => {
@@ -132,6 +134,15 @@ function AppInner() {
       document.body.style.overflow = previousOverflow;
     };
   }, [cartOpen, quoteOpen, productDetailOpen]);
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
+    if (!productDetailOpen || !selectedProduct || selectedProduct.images.length < 2) return;
+    const timer = window.setInterval(() => {
+      setSelectedImageIndex((index) => (index + 1) % selectedProduct.images.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [productDetailOpen, selectedProduct]);
 
   const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
 
@@ -194,15 +205,31 @@ function AppInner() {
     setDeliveryError('');
     const totalItems = cart.reduce((sum, c) => sum + c.qty, 0);
     const text = encodeURIComponent(
-      `Hello JBR Electrical,\n\nI have placed an order request with ${cart.length} items (${totalItems} units).\n\nPlease see the attached PDF for the complete list.\n\nDelivery Details:\nName: ${deliveryName || 'N/A'}\nMobile: ${deliveryPhone || 'N/A'}\nAddress: ${deliveryAddress || 'N/A'}\nShop Opening Time: ${deliveryShopTime || 'N/A'}\n\nI will call to confirm this order.`
+      `Hello JBR Electrical,\n\nI have placed an order request with ${cart.length} items (${totalItems} units).\n\nDelivery Details:\nName: ${deliveryName}\nMobile: ${deliveryPhone}\nAddress: ${deliveryAddress}\nShop Opening Time: ${deliveryShopTime}\n\nI will call to confirm this order.`
     );
     const { generateOrderPdf } = await import('./utils/pdfGenerator.ts');
-    await generateOrderPdf(cart, phoneNumber);
-    window.open(`https://wa.me/916377374179?text=${text}`);
+    const file = generateOrderPdf(cart, {
+      name: deliveryName,
+      phone: deliveryPhone,
+      address: deliveryAddress,
+      shopTime: deliveryShopTime,
+      shopImage,
+    });
+    const downloadUrl = URL.createObjectURL(file);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = file.name;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    URL.revokeObjectURL(downloadUrl);
+
+    window.location.assign(`https://wa.me/916377374179?text=${text}`);
   }
 
   function openProductDetail(product: Product) {
     setSelectedProduct(product);
+    setSelectedImageIndex(0);
     setProductDetailOpen(true);
   }
 
@@ -462,10 +489,26 @@ function AppInner() {
                   <input value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="Mobile number *" type="tel" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
                   <textarea value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Delivery address *" required rows={3} style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%', resize: 'vertical' }} />
                   <input value={deliveryShopTime} onChange={(e) => setDeliveryShopTime(e.target.value)} placeholder="Shop opening time *" required style={{ padding: '13px 16px', border: '1.5px solid #e2eaed', borderRadius: 12, background: '#f8fbfc', fontSize: 14, color: 'var(--ink)', outline: 'none', boxSizing: 'border-box', width: '100%' }} />
+                  <label className="shop-image-upload">
+                    <span>Shop card or banner <small>(optional)</small></span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={async (event) => {
+                        const file = event.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = () => setShopImage(String(reader.result));
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                    {shopImage && <img src={shopImage} alt="Selected shop card or banner" />}
+                  </label>
                   {deliveryError && <p style={{ color: '#e11d48', fontSize: 12, margin: 0 }}>{deliveryError}</p>}
                 </div>
 
                 <div className="cart-actions">
+                  <p className="whatsapp-pdf-note"><span style={{ color: 'orange' }}>NOTE: </span>Please attach the downloaded PDF on WhatsApp. PDF file will download automatically. </p>
                   <button onClick={whatsappEnquiry} className="button button-navy">
                     <MessageCircle size={15} /> Order Now
                   </button>
@@ -488,7 +531,14 @@ function AppInner() {
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, padding: 0, overflow: 'hidden' }}>
             {selectedProduct.images && selectedProduct.images.length > 0 && (
               <div style={{ width: '100%', background: '#f4f8f6' }}>
-                <img src={selectedProduct.images[0]} alt={selectedProduct.name} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                <img src={selectedProduct.images[selectedImageIndex]} alt={`${selectedProduct.name} image ${selectedImageIndex + 1}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                {selectedProduct.images.length > 1 && (
+                  <div className="product-carousel-dots" aria-label="Product images">
+                    {selectedProduct.images.map((image, index) => (
+                      <button key={`${image}-${index}`} type="button" className={index === selectedImageIndex ? 'active' : ''} onClick={() => setSelectedImageIndex(index)} aria-label={`Show image ${index + 1}`} />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

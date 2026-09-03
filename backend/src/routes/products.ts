@@ -216,7 +216,7 @@ productRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, nex
         description,
         brandId,
         categoryId,
-        images,
+        images: Array.isArray(images) ? images.slice(0, 5) : [],
         price: Number(price),
         salePrice: salePrice ? Number(salePrice) : undefined,
         stock: Number(stock),
@@ -250,7 +250,7 @@ productRouter.put('/:id', authenticate, async (req: AuthenticatedRequest, res, n
     if (description !== undefined) updateData.description = description;
     if (brandId !== undefined) updateData.brand = { connect: { id: brandId } };
     if (categoryId !== undefined) updateData.category = { connect: { id: categoryId } };
-    if (images !== undefined) updateData.images = images;
+    if (images !== undefined) updateData.images = Array.isArray(images) ? images.slice(0, 5) : [];
     if (price !== undefined) updateData.price = Number(price);
     if (salePrice !== undefined) updateData.salePrice = salePrice ? Number(salePrice) : null;
     if (stock !== undefined) {
