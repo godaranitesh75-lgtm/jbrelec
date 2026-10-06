@@ -247,6 +247,67 @@ function AppInner() {
     { label: 'Contact', to: '/contact' },
   ];
 
+  const electricalHeroArt = {
+    wires: 'https://images.unsplash.com/photo-1590500246978-5cd7d6f8a17f?auto=format&fit=crop&w=1400&q=80',
+    switches: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1400&q=80',
+    lighting: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80',
+    stock: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1400&q=80',
+  } as const;
+
+  const heroFallbackArt = electricalHeroArt.stock;
+  const productFallbackArt = electricalHeroArt.switches;
+
+  const heroSlides = [
+    {
+      eyebrow: 'Electrical essentials',
+      title: 'Wires, switches, bulbs, sockets and more for every electrical need.',
+      subtitle: 'Trusted electrical shop for wiring accessories, modular products, lighting solutions, protection devices, and everyday hardware for homes and projects.',
+      primaryCta: 'Shop electrical items',
+      secondaryCta: 'Get a quote',
+      image: electricalHeroArt.wires,
+      badge: 'Wiring & accessories',
+    },
+    {
+      eyebrow: 'Reliable power supply',
+      title: 'High-quality switches, sockets, pins and control solutions.',
+      subtitle: 'Built for safe installations and daily performance, with dependable components for homes, offices, shops, and industrial setups.',
+      primaryCta: 'Browse products',
+      secondaryCta: 'Talk to JBR',
+      image: electricalHeroArt.switches,
+      badge: 'Switches & sockets',
+    },
+    {
+      eyebrow: 'Lighting & protection',
+      title: 'Bulbs, fittings, MCBs and safety gear for dependable performance.',
+      subtitle: 'Find the right lighting, protection devices, and wiring essentials that help every setup run safely and efficiently.',
+      primaryCta: 'Explore catalogue',
+      secondaryCta: 'Enquire now',
+      image: electricalHeroArt.lighting,
+      badge: 'Lighting & safety',
+    },
+    {
+      eyebrow: 'Built for real work',
+      title: 'Your electrical shop for bulk, repair and project-ready supplies.',
+      subtitle: 'From cable rolls to pin sockets and installation essentials, JBR supports every electrical requirement with practical stock and trusted service.',
+      primaryCta: 'View categories',
+      secondaryCta: 'Request stock list',
+      image: electricalHeroArt.stock,
+      badge: 'Project-ready stock',
+    },
+  ];
+
+  const resolveImage = (image?: string) => image && image.trim() ? image : heroFallbackArt;
+
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveHeroIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   const openQuoteModal = () => {
     setSubmitted(false);
     setQuoteName('');
@@ -298,14 +359,69 @@ function AppInner() {
       <main id="top">
         <section className="hero section-grid">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-line" /> JBR ELECTRICAL <span className="eyebrow-dot" /></div>
-            <h1>Powering every connection with <em>quality</em> you can trust.</h1>
-            <p className="hero-lede">Reliable electrical products, accessories and solutions for homes, businesses, electricians and projects.</p>
+            <div className="eyebrow"><span className="eyebrow-line" /> {heroSlides[activeHeroIndex].eyebrow} <span className="eyebrow-dot" /></div>
+            <h1>{heroSlides[activeHeroIndex].title}</h1>
+            <p className="hero-lede">{heroSlides[activeHeroIndex].subtitle}</p>
+            <div className="hero-actions">
+              <Link className="button button-orange" to="/">{heroSlides[activeHeroIndex].primaryCta}</Link>
+              <Link className="button button-outline" to="/quote">{heroSlides[activeHeroIndex].secondaryCta}</Link>
+            </div>
             <div className="hero-note"><BadgeCheck size={18} /> <span>Product availability and pricing may vary. <strong>Ask JBR for current details.</strong></span></div>
           </div>
+
           <div className="hero-visual">
             <div className="hero-grid-pattern" />
-            <div className="hero-image-wrap"><img src={heroImage} alt="Organized electrical wiring and control components" /></div>
+            <div className="hero-carousel-shell">
+              <div
+                className="hero-carousel-track"
+                style={{ transform: `translateX(-${activeHeroIndex * 100}%)` }}
+              >
+                {heroSlides.map((slide) => (
+                  <div className="hero-slide" key={slide.title}>
+                    <div className="hero-slide-glow" />
+                    <img
+                      src={resolveImage(slide.image)}
+                      alt={slide.title}
+                      onError={(event) => {
+                        event.currentTarget.src = heroFallbackArt;
+                      }}
+                    />
+                    <div className="hero-slide-badge">{slide.badge}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="hero-carousel-controls" aria-label="Hero slide controls">
+              <button
+                type="button"
+                className="hero-arrow"
+                onClick={() => setActiveHeroIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
+                aria-label="Previous slide"
+              >
+                ←
+              </button>
+              <div className="hero-dots" aria-label="Slide indicators">
+                {heroSlides.map((slide, index) => (
+                  <button
+                    key={`${slide.title}-${index}`}
+                    type="button"
+                    className={index === activeHeroIndex ? 'dot active' : 'dot'}
+                    onClick={() => setActiveHeroIndex(index)}
+                    aria-label={`Show slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                className="hero-arrow"
+                onClick={() => setActiveHeroIndex((prev) => (prev + 1) % heroSlides.length)}
+                aria-label="Next slide"
+              >
+                →
+              </button>
+            </div>
+
             <div className="hero-product-card"><div className="product-card-icon"><ShieldCheck size={20} /></div><div><strong>Built for real work</strong><span>Products selected for everyday reliability</span></div></div>
             <div className="hero-stamp"><span>JBR</span><small>Electrical<br />partner</small></div>
           </div>
@@ -365,9 +481,25 @@ function AppInner() {
                     onClick={() => openProductDetail(product)}
                     className={`product-card ${inCart ? 'product-card--active' : ''}`}
                   >
-                    {product.images && product.images.length > 0 && (
+                    {product.images && product.images.length > 0 ? (
                       <div className="product-card-image">
-                        <img src={product.images[0]} alt={product.name} />
+                        <img
+                          src={resolveImage(product.images[0])}
+                          alt={product.name}
+                          onError={(event) => {
+                            event.currentTarget.src = productFallbackArt;
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="product-card-image">
+                        <img
+                          src={productFallbackArt}
+                          alt={product.name}
+                          onError={(event) => {
+                            event.currentTarget.src = productFallbackArt;
+                          }}
+                        />
                       </div>
                     )}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
@@ -529,9 +661,16 @@ function AppInner() {
       {productDetailOpen && selectedProduct && (
         <div className="modal-backdrop" onClick={closeProductDetail}>
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, padding: 0, overflow: 'hidden' }}>
-            {selectedProduct.images && selectedProduct.images.length > 0 && (
+            {selectedProduct.images && selectedProduct.images.length > 0 ? (
               <div style={{ width: '100%', background: '#f4f8f6' }}>
-                <img src={selectedProduct.images[selectedImageIndex]} alt={`${selectedProduct.name} image ${selectedImageIndex + 1}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                <img
+                  src={resolveImage(selectedProduct.images[selectedImageIndex])}
+                  alt={`${selectedProduct.name} image ${selectedImageIndex + 1}`}
+                  onError={(event) => {
+                    event.currentTarget.src = productFallbackArt;
+                  }}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
                 {selectedProduct.images.length > 1 && (
                   <div className="product-carousel-dots" aria-label="Product images">
                     {selectedProduct.images.map((image, index) => (
@@ -539,6 +678,14 @@ function AppInner() {
                     ))}
                   </div>
                 )}
+              </div>
+            ) : (
+              <div style={{ width: '100%', background: '#f4f8f6' }}>
+                <img
+                  src={productFallbackArt}
+                  alt={`${selectedProduct.name} product illustration`}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                />
               </div>
             )}
 

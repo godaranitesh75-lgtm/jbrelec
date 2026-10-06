@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { prisma } from '../libs/prisma.js';
 import { createAudit } from '../services/audit.js';
+import { hashPassword, verifyPassword } from '../services/auth.js';
 import type { AuthenticatedRequest } from '../types.js';
 
 export const accountRouter = Router();
@@ -18,6 +19,34 @@ accountRouter.get('/profile', async (req: AuthenticatedRequest, res, next) => {
     });
 
     return res.json(profile);
+  } catch (error) {
+    next(error);
+  }
+});
+
+accountRouter.post('/password', async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = req.user;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!user) return res.status(401).json({ message: 'Unauthorized' });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required' });
+    }
+    if (typeof newPassword !== 'string' || newPassword.length < 8) {
+      return res.status(400).json({ message: 'New password must be at least 8 characters' });
+    }
+    if (!(await verifyPassword(user.passwordHash, currentPassword))) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await hashPassword(newPassword) },
+    });
+    await createAudit({ actorId: user.id, actorRole: user.role, action: 'CHANGE_PASSWORD', entityType: 'User', entityId: user.id });
+
+    return res.json({ message: 'Password changed successfully' });
   } catch (error) {
     next(error);
   }

@@ -5,30 +5,38 @@ import { hashPassword } from '../src/services/auth.js';
 dotenv.config({ path: '../.env' });
 
 async function addAdmin() {
+  const email = process.env.ADMIN_EMAIL || 'godaranitesh75@gmail.com';
+  const phone = process.env.ADMIN_PHONE || '9000000004';
+  const name = process.env.ADMIN_NAME || 'Nitesh Godara';
+  const password = process.env.ADMIN_PASSWORD || 'Jaatboy@18';
   const existing = await prisma.user.findFirst({
-    where: { email: 'godaranitesh75@gmail.com' },
+    where: { email },
   });
 
   if (existing) {
-    console.log('Admin user already exists.');
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: { passwordHash: await hashPassword(password), role: 'ADMIN', status: 'ACTIVE' },
+    });
+    console.log(`Admin user password and status updated: ${email}`);
     await prisma.$disconnect();
     return;
   }
 
-  const passwordHash = await hashPassword('Jaatboy@18');
+  const passwordHash = await hashPassword(password);
 
   await prisma.user.create({
     data: {
-      email: 'godaranitesh75@gmail.com',
-      phone: '9000000004',
+      email,
+      phone,
       passwordHash,
       role: 'ADMIN',
       status: 'ACTIVE',
-      adminProfile: { create: { name: 'Nitesh Godara', roleTitle: 'Administrator' } },
+      adminProfile: { create: { name, roleTitle: 'Administrator' } },
     },
   });
 
-  console.log('Admin user created: godaranitesh75@gmail.com');
+  console.log(`Admin user created: ${email}`);
   await prisma.$disconnect();
 }
 
