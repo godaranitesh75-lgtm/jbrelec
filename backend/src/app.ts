@@ -29,7 +29,15 @@ const frontendDist = candidateDistPaths.find((candidate) => existsSync(path.join
 const frontendIndex = frontendDist ? path.join(frontendDist, 'index.html') : null;
 const adminProductsHtml = path.resolve(__dirname, '../../admin-products.html');
 
-const defaultAllowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'https://jbr-electrical.vercel.app',
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+];
 const configuredOrigins = (process.env.CORS_ORIGIN ?? process.env.ALLOWED_ORIGINS ?? '')
   .split(',')
   .map((origin) => origin.trim())
@@ -124,4 +132,3 @@ app.get('*', (req, res, next) => {
 });
 
 app.use(errorHandler);
-

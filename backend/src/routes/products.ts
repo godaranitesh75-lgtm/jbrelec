@@ -7,7 +7,7 @@ import { authenticate } from '../middleware/auth.js';
 const productCache = new Map<string, { data: unknown; expires: number }>();
 const CACHE_TTL = 5_000;
 
-function clearProductCache() {
+export function clearProductCache() {
   productCache.clear();
 }
 
@@ -317,5 +317,4 @@ productRouter.post('/categories', authenticate, async (req: AuthenticatedRequest
 });
 
 productRouter.get('/ping', (_req, res) => res.json({ ping: 'pong' }));
-
 

@@ -2,8 +2,19 @@ import { Router } from 'express';
 import { prisma } from '../libs/prisma.js';
 import { hashPassword, verifyPassword, signJwt } from '../services/auth.js';
 import { createAudit } from '../services/audit.js';
+import { authenticate } from '../middleware/auth.js';
+import type { AuthenticatedRequest } from '../types.js';
 
 export const authRouter = Router();
+
+authRouter.get('/me', authenticate, (req: AuthenticatedRequest, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+
+  return res.json({ user: { id: user.id, email: user.email, role: user.role } });
+});
 
 function sanitizeEmail(value: unknown) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -133,5 +144,4 @@ authRouter.post('/reset-password', async (req, res, next) => {
 authRouter.post('/logout', (_req, res) => {
   return res.json({ message: 'Logout completed' });
 });
-
 
