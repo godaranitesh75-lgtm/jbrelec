@@ -46,6 +46,7 @@ export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [form, setForm] = useState({
@@ -116,29 +117,58 @@ export function AdminProducts() {
 
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
-    processFiles(files);
+    void processFiles(files);
+    e.target.value = '';
   }
 
-  function processFiles(files: File[]) {
+  async function processFiles(files: File[]) {
+    if (uploadingImages) return;
     const availableSlots = MAX_PRODUCT_IMAGES - images.length;
     if (availableSlots <= 0) {
       setMessage({ type: 'error', text: `A product can have a maximum of ${MAX_PRODUCT_IMAGES} images.` });
       return;
     }
     const selectedFiles = files.slice(0, availableSlots);
-    if (files.length > selectedFiles.length) {
-      setMessage({ type: 'error', text: `Only ${MAX_PRODUCT_IMAGES} images are allowed per product.` });
-    }
-    const readers = selectedFiles.map((file) => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => resolve(ev.target?.result as string);
-        reader.readAsDataURL(file);
+    setUploadingImages(true);
+    setMessage(null);
+
+    let uploadedCount = 0;
+    try {
+      for (const file of selectedFiles) {
+        const body = new FormData();
+        body.append('image', file);
+        const token = localStorage.getItem('jbr_token');
+        const res = await fetch(`${API_BASE}/uploads/image`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body,
+        });
+        const data: { url?: string; message?: string } = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to upload image.');
+        }
+        if (!data.url) {
+          throw new Error('The image upload response did not include a URL.');
+        }
+        const uploadedUrl = data.url;
+        setImages((prev) => [...prev, uploadedUrl].slice(0, MAX_PRODUCT_IMAGES));
+        uploadedCount += 1;
+      }
+
+      if (files.length > selectedFiles.length) {
+        setMessage({ type: 'error', text: `Only ${MAX_PRODUCT_IMAGES} images are allowed per product.` });
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Unexpected upload error.';
+      setMessage({
+        type: 'error',
+        text: uploadedCount > 0
+          ? `${uploadedCount} image(s) uploaded; the next upload failed: ${detail}`
+          : detail,
       });
-    });
-    Promise.all(readers).then((results) => {
-      setImages((prev) => [...prev, ...results].slice(0, MAX_PRODUCT_IMAGES));
-    });
+    } finally {
+      setUploadingImages(false);
+    }
   }
 
   async function submitProduct(e: FormEvent) {
@@ -443,8 +473,8 @@ export function AdminProducts() {
                 onDrop={(e) => {
                   e.preventDefault();
                   setDragOver(false);
-                  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-                  if (files.length) processFiles(files);
+                  const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+                  if (files.length) void processFiles(files);
                 }}
                 style={{
                   border: `2px dashed ${dragOver ? '#0d9488' : '#cbd5e1'}`,
@@ -459,13 +489,14 @@ export function AdminProducts() {
               >
                 <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
                 <p style={{ margin: 0, fontWeight: 700, color: '#0f3d3a' }}>Drop product photos here</p>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7f8c' }}>Select up to {MAX_PRODUCT_IMAGES} images from your device</p>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7f8c' }}>Upload up to {MAX_PRODUCT_IMAGES} JPEG, PNG, WebP, or AVIF images (5 MB max each)</p>
                 <input
                   id="adminImages"
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleImageUpload}
+                  disabled={uploadingImages}
                   style={{ display: 'none' }}
                 />
               </div>
@@ -476,11 +507,11 @@ export function AdminProducts() {
                   ))}
                 </div>
               )}
-              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6b7f8c' }}>{images.length}/{MAX_PRODUCT_IMAGES} images selected</p>
+              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6b7f8c' }}>{images.length}/{MAX_PRODUCT_IMAGES} images uploaded</p>
             </label>
 
-            <button type="submit" disabled={saving} style={{ padding: '12px 16px', borderRadius: 8, border: 'none', background: '#0d9488', color: 'white', fontWeight: 800, cursor: 'pointer' }}>
-              {saving ? 'Saving...' : editingId ? 'Update Product' : 'Save Product'}
+            <button type="submit" disabled={saving || uploadingImages} style={{ padding: '12px 16px', borderRadius: 8, border: 'none', background: '#0d9488', color: 'white', fontWeight: 800, cursor: 'pointer' }}>
+              {uploadingImages ? 'Uploading images...' : saving ? 'Saving...' : editingId ? 'Update Product' : 'Save Product'}
             </button>
           </form>
         </div>

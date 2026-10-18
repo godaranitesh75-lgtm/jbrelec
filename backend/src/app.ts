@@ -13,6 +13,7 @@ import { deliveryRouter } from './routes/deliveries.js';
 import { adminRouter } from './routes/admin.js';
 import { accountRouter } from './routes/account.js';
 import { blogRouter } from './routes/blog.js';
+import { uploadRouter } from './routes/uploads.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -104,6 +105,7 @@ app.use('/api/deliveries', deliveryRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/account', accountRouter);
 app.use('/api/blog', blogRouter);
+app.use('/api/uploads', uploadRouter);
 
 if (frontendDist) {
   app.use(express.static(frontendDist));

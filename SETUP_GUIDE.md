@@ -121,7 +121,16 @@ DATABASE_URL=postgresql://...    # Neon Cloud connection
 PORT=4000                        # Backend port
 NODE_ENV=development             # Environment
 JWT_SECRET=...                   # JWT signing key
+CLOUDINARY_CLOUD_NAME=...        # Cloudinary cloud name
+CLOUDINARY_API_KEY=...           # Cloudinary API key
+CLOUDINARY_API_SECRET=...        # Keep this secret on the backend only
 ```
+
+The admin product form uploads photos through the authenticated backend endpoint
+`POST /api/uploads/image`. It stores the returned Cloudinary URLs in the product
+record in Neon. Configure the three Cloudinary variables in the backend's local
+`.env` file and in the deployed backend service environment; do not add them to
+the frontend environment.
 
 ---
 

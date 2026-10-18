@@ -58,3 +58,9 @@ test('requires an authenticated admin for the mobile catalog API', async () => {
   assert.equal(response.status, 401);
   assert.deepEqual(await response.json(), { message: 'Authentication required' });
 });
+
+test('requires authentication before accepting a Cloudinary image upload', async () => {
+  const response = await fetch(`${baseUrl}/api/uploads/image`, { method: 'POST' });
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { message: 'Authentication required' });
+});
