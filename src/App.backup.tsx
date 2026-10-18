@@ -17,7 +17,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useAuth } from './auth.tsx';
+import { useAuth } from './hooks/use-auth.ts';
 import api from './api.ts';
 
 const heroImage = 'https://images.pexels.com/photos/28265032/pexels-photo-28265032.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';

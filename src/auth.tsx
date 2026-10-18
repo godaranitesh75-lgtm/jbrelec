@@ -1,22 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { AuthContext, type UserRole } from './contexts/auth-context.ts';
 import api from './api.ts';
-
-export type UserRole = 'ADMIN' | 'STAFF' | 'DELIVERY_BOY' | 'CUSTOMER';
 
 interface User {
   id: string;
   email: string;
   role: UserRole;
 }
-
-interface AuthContextValue {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<User>;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -54,11 +44,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ user, loading, login, logout }), [user, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
 }
 

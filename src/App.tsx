@@ -17,17 +17,16 @@ import {
   ShoppingCart,
   Trash2,
 } from 'lucide-react';
-import { GlobalSearchProvider, useGlobalSearch } from './contexts/GlobalSearchContext.tsx';
+import { GlobalSearchProvider } from './contexts/GlobalSearchContext.tsx';
+import { useGlobalSearch } from './hooks/use-global-search.ts';
 
-const heroImage = 'https://images.pexels.com/photos/28265032/pexels-photo-28265032.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
-
-export interface CategoryItem {
+interface CategoryItem {
   id: number;
   name: string;
   items: Product[];
 }
 
-export interface Product {
+interface Product {
   id: string;
   name: string;
   brand: string;
@@ -42,7 +41,7 @@ export interface Product {
   description: string;
 }
 
-export const CATEGORIES: CategoryItem[] = [
+const CATEGORIES: CategoryItem[] = [
   { id: 1, name: 'Wires, Cables & Wiring Accessories', items: [] },
   { id: 2, name: 'Switches, Sockets & Modular', items: [] },
   { id: 3, name: 'Lighting & Fans', items: [] },
@@ -306,7 +305,7 @@ function AppInner() {
     }, 5000);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [heroSlides.length]);
 
   const openQuoteModal = () => {
     setSubmitted(false);

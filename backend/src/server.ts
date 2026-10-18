@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import { createServer } from 'http';
+import { fileURLToPath } from 'node:url';
 import { app } from './app.js';
 import { initSocket } from './libs/socket.js';
 
-dotenv.config();
+dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 
 const port = Number(process.env.PORT ?? 4000);
 const server = createServer(app);

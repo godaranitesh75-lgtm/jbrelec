@@ -1,7 +1,8 @@
 import { Navigate, Outlet, createBrowserRouter, RouterProvider } from 'react-router-dom';
-import type { UserRole } from './auth.tsx';
+import type { UserRole } from './contexts/auth-context.ts';
 import App from './App.tsx';
-import { AuthProvider, useAuth } from './auth.tsx';
+import { AuthProvider } from './auth.tsx';
+import { useAuth } from './hooks/use-auth.ts';
 import { AdminDashboard } from './views/AdminDashboard.tsx';
 import { AdminProducts } from './views/AdminProducts.tsx';
 import { About } from './views/About.tsx';
@@ -32,7 +33,7 @@ function ProtectedRoute({ roles }: { roles: UserRole[] }) {
   return <Outlet />;
 }
 
-export const router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
@@ -118,4 +119,3 @@ export function RouterProviderWithAuth() {
     </GlobalSearchProvider>
   );
 }
-

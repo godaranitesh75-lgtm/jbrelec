@@ -1,6 +1,6 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth.tsx';
+import { useAuth } from '../hooks/use-auth.ts';
 
 const getApiBaseUrl = () => {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '');
@@ -69,17 +69,7 @@ export function AdminProducts() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultBrandId, setDefaultBrandId] = useState<string>('');
 
-  useEffect(() => {
-    if (!user || user.role !== 'ADMIN') {
-      navigate('/admin');
-      return;
-    }
-    loadCategories();
-    loadBrands();
-    loadProducts();
-  }, [user, navigate]);
-
-  async function loadBrands() {
+  const loadBrands = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/products/brands`);
       const data = await res.json();
@@ -91,7 +81,17 @@ export function AdminProducts() {
     } catch (err) {
       console.error('Failed to load brands', err);
     }
-  }
+  }, [defaultBrandId]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'ADMIN') {
+      navigate('/admin');
+      return;
+    }
+    loadCategories();
+    loadBrands();
+    loadProducts();
+  }, [user, navigate, loadBrands]);
 
   async function loadCategories() {
     try {

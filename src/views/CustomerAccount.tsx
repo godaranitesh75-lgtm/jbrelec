@@ -1,4 +1,4 @@
-import { useAuth } from '../auth.tsx';
+import { useAuth } from '../hooks/use-auth.ts';
 
 export function CustomerAccount() {
   const { user, logout } = useAuth();

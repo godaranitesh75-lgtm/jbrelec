@@ -115,7 +115,8 @@ No `.env` needed for development. API calls default to `http://localhost:4000`
 
 ### Backend (.env in backend/)
 
-Already configured with:
+Set these variables in `backend/.env` for local development and in the backend
+service environment for deployment:
 ```
 DATABASE_URL=postgresql://...    # Neon Cloud connection
 PORT=4000                        # Backend port

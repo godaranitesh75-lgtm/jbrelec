@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth.tsx';
+import { useAuth } from '../hooks/use-auth.ts';
 
 export function Login() {
   const { login } = useAuth();
