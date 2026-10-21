@@ -25,7 +25,9 @@ productRouter.get('/', async (req, res, next) => {
       return res.json(cached.data);
     }
 
-    const where: Prisma.ProductWhereInput = { status: 'ACTIVE' };
+    const where: Prisma.ProductWhereInput = {
+      status: { equals: 'ACTIVE', mode: 'insensitive' },
+    };
 
     if (search && typeof search === 'string') {
       where.OR = [
@@ -204,8 +206,28 @@ productRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, nex
     }
 
     const { sku, name, slug, description, brandId, categoryId, images = [], price, salePrice, stock, specifications, status = 'ACTIVE' } = req.body;
-    if (!sku || !name || !slug || !brandId || !categoryId || !price || stock == null) {
+    if (!sku || !name || !slug || !brandId || !categoryId || price == null || stock == null) {
       return res.status(400).json({ message: 'Missing required product fields' });
+    }
+
+    const numericPrice = Number(price);
+    const numericStock = Number(stock);
+    const numericSalePrice = salePrice == null || salePrice === '' ? undefined : Number(salePrice);
+    if (
+      !Number.isFinite(numericPrice) || numericPrice < 0 ||
+      !Number.isInteger(numericStock) || numericStock < 0 ||
+      (numericSalePrice !== undefined && (!Number.isFinite(numericSalePrice) || numericSalePrice < 0))
+    ) {
+      return res.status(400).json({ message: 'Price and stock must be valid non-negative numbers.' });
+    }
+
+    let parsedSpecifications: Prisma.InputJsonValue | undefined;
+    if (specifications) {
+      try {
+        parsedSpecifications = JSON.parse(specifications) as Prisma.InputJsonValue;
+      } catch {
+        return res.status(400).json({ message: 'Specifications must be valid JSON.' });
+      }
     }
 
     const product = await prisma.product.create({
@@ -217,12 +239,12 @@ productRouter.post('/', authenticate, async (req: AuthenticatedRequest, res, nex
         brandId,
         categoryId,
         images: Array.isArray(images) ? images.slice(0, 5) : [],
-        price: Number(price),
-        salePrice: salePrice ? Number(salePrice) : undefined,
-        stock: Number(stock),
+        price: numericPrice,
+        salePrice: numericSalePrice,
+        stock: numericStock,
         status,
-        specifications: specifications ? JSON.parse(specifications) : undefined,
-        inventory: { create: { available: Number(stock), reserved: 0, sold: 0 } },
+        specifications: parsedSpecifications,
+        inventory: { create: { available: numericStock, reserved: 0, sold: 0 } },
       },
     });
 
@@ -317,4 +339,3 @@ productRouter.post('/categories', authenticate, async (req: AuthenticatedRequest
 });
 
 productRouter.get('/ping', (_req, res) => res.json({ ping: 'pong' }));
-

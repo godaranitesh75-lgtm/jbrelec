@@ -20,12 +20,6 @@ import {
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext.tsx';
 import { useGlobalSearch } from './hooks/use-global-search.ts';
 
-interface CategoryItem {
-  id: number;
-  name: string;
-  items: Product[];
-}
-
 interface Product {
   id: string;
   name: string;
@@ -40,19 +34,6 @@ interface Product {
   images: string[];
   description: string;
 }
-
-const CATEGORIES: CategoryItem[] = [
-  { id: 1, name: 'Wires, Cables & Wiring Accessories', items: [] },
-  { id: 2, name: 'Switches, Sockets & Modular', items: [] },
-  { id: 3, name: 'Lighting & Fans', items: [] },
-  { id: 4, name: 'MCB, Protection & Distribution', items: [] },
-  { id: 5, name: 'Switchgear, Control & Automation', items: [] },
-  { id: 6, name: 'Earthing & Electrical Safety', items: [] },
-  { id: 7, name: 'Tools & Testing Instruments', items: [] },
-  { id: 8, name: 'Motors, Capacitors & Industrial', items: [] },
-  { id: 9, name: 'Power Backup, Solar & Batteries', items: [] },
-  { id: 10, name: 'Smart, Security & Communication', items: [] },
-];
 
 const whatsappPhone = '916377374179';
 const phoneNumber = '6377374179';
@@ -88,6 +69,8 @@ function AppInner() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
   const [deliveryName, setDeliveryName] = useState('');
   const [deliveryPhone, setDeliveryPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -98,12 +81,16 @@ function AppInner() {
   useEffect(() => {
     fetch(`${API_BASE}/products?limit=3000`)
       .then((res) => {
-        console.log('[App] products fetch status', res.status);
+        if (!res.ok) {
+          throw new Error(`Product request failed (${res.status}).`);
+        }
         return res.json();
       })
       .then((data) => {
-        console.log('[App] products fetch data', data);
-        const mapped: Product[] = (data.products || []).map((p: { id: string; name: string; brand?: { name: string }; sku?: string; description?: string; specifications?: Record<string, unknown>; price?: number; stock?: number; images?: string[] }) => ({
+        if (!Array.isArray(data.products)) {
+          throw new Error('The product service returned an invalid response.');
+        }
+        const mapped: Product[] = data.products.map((p: { id: string; name: string; brand?: { name: string }; sku?: string; description?: string; specifications?: Record<string, unknown>; price?: number; stock?: number; images?: string[] }) => ({
           id: p.id,
           name: p.name,
           brand: p.brand?.name || '',
@@ -117,11 +104,14 @@ function AppInner() {
           images: p.images || [],
           description: p.description || '',
         }));
-        console.log('[App] mapped products', mapped);
         setDbProducts(mapped);
       })
       .catch((err) => {
         console.error('Failed to load products', err);
+        setProductsError(err instanceof Error ? err.message : 'Unable to load products.');
+      })
+      .finally(() => {
+        setProductsLoading(false);
       });
   }, []);
 
@@ -459,8 +449,13 @@ function AppInner() {
                 <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#8a9aa5', pointerEvents: 'none' }} />
               </div>
             </div>
+            {productsLoading && <p className="empty-state-text">Loading products…</p>}
+            {productsError && <p className="empty-state-text" role="alert">Products could not be loaded: {productsError}</p>}
+            {!productsLoading && !productsError && dbProducts.length === 0 && (
+              <p className="empty-state-text">No products are currently available.</p>
+            )}
             <div className="products-grid">
-              {(dbProducts.length > 0 ? dbProducts : CATEGORIES.flatMap((cat) => cat.items))
+              {dbProducts
                 .filter((product) => {
                   if (!query.trim()) return true;
                   const q = query.toLowerCase();

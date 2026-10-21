@@ -183,7 +183,18 @@ export function AdminProducts() {
 
       const name = form.name.trim();
       const sku = form.sku.trim();
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+      const slugSuffix = sku.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || crypto.randomUUID();
+      const slug = `${slugBase}-${slugSuffix}`;
+
+      if (form.specifications.trim()) {
+        try {
+          JSON.parse(form.specifications);
+        } catch {
+          setMessage({ type: 'error', text: 'Specifications must be valid JSON.' });
+          return;
+        }
+      }
 
       const payload = {
         ...form,
@@ -228,8 +239,9 @@ export function AdminProducts() {
       });
       setImages([]);
       loadProducts();
-    } catch {
-      setMessage({ type: 'error', text: 'Error saving product' });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Unexpected error.';
+      setMessage({ type: 'error', text: `Error saving product: ${detail}` });
     } finally {
       setSaving(false);
     }

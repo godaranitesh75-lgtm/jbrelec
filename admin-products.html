@@ -318,7 +318,7 @@
       if (window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
         return 'http://localhost:4000/api';
       }
-      return `${window.location.origin}/api`;
+      return 'https://jbrelec.onrender.com/api';
     })();
     let token = localStorage.getItem('jbr_token') || localStorage.getItem('admin_token');
     let uploadedImages = [];
@@ -734,10 +734,23 @@
         return;
       }
 
+      const specifications = document.getElementById('specifications').value.trim();
+      if (specifications) {
+        try {
+          JSON.parse(specifications);
+        } catch {
+          status.className = 'status error';
+          status.textContent = 'Specifications must be valid JSON.';
+          return;
+        }
+      }
+
+      const slugBase = generateSlug(name) || 'product';
+      const slugSuffix = generateSlug(sku) || crypto.randomUUID();
       const payload = {
         categoryId: document.getElementById('categoryId').value || window.__defaultCategoryId || '',
         sku: sku,
-        slug: generateSlug(name),
+        slug: `${slugBase}-${slugSuffix}`,
         name: name,
         description: document.getElementById('description').value,
         brandId: document.getElementById('brandId').value || window.__defaultBrandId || null,
@@ -745,7 +758,7 @@
         price: Number(document.getElementById('price').value || 0),
         salePrice: document.getElementById('salePrice').value ? Number(document.getElementById('salePrice').value) : undefined,
         stock: Number(document.getElementById('stock').value || 0),
-        specifications: document.getElementById('specifications').value || undefined,
+        specifications: specifications || undefined,
         status: 'ACTIVE'
       };
 
@@ -781,7 +794,7 @@
         loadProducts();
       } catch (err) {
         status.className = 'status error';
-        status.textContent = 'Error saving product';
+        status.textContent = `Error saving product: ${err instanceof Error ? err.message : 'Unexpected error.'}`;
       }
     }
 
