@@ -82,7 +82,7 @@
 </head>
 <body>
   <div class="container">
-    <div class="card" id="loginCard">
+    <div class="card hidden" id="loginCard">
       <h1>Admin Login</h1>
       <label>Email</label>
       <input id="loginEmail" type="email" placeholder="Enter email" />
@@ -973,6 +973,8 @@
       loadBlogPosts();
       loadBrandList();
     }
+
+    showAdmin();
 
     async function submitBrand() {
       const status = document.getElementById('brandStatus');
