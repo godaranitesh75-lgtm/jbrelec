@@ -111,6 +111,7 @@
 
     <div class="card hidden" id="adminPanel">
       <h1>Account Security</h1>
+      <div class="status" id="authNotice"></div>
       <div class="row">
         <div>
           <label>Current Password</label>
@@ -312,21 +313,29 @@
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:4000/api';
-    let token = localStorage.getItem('admin_token');
+    const API_BASE = (() => {
+      const hostname = window.location.hostname;
+      if (window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
+        return 'http://localhost:4000/api';
+      }
+      return `${window.location.origin}/api`;
+    })();
+    let token = localStorage.getItem('jbr_token') || localStorage.getItem('admin_token');
     let uploadedImages = [];
 
     async function loadCategories() {
-      const res = await fetch(`${API_BASE}/products/categories`);
-      const data = await res.json();
-      const select = document.getElementById('categoryId');
-      if (select) {
-        select.innerHTML = '<option value="">Select category</option>' + data.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      }
-
       const list = document.getElementById('categoryList');
-      if (list) {
-        list.innerHTML = data.categories.map(c => `
+      try {
+        const res = await fetch(`${API_BASE}/products/categories`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+
+        const categories = data.categories || [];
+        const select = document.getElementById('categoryId');
+        if (select) {
+          select.innerHTML = '<option value="">Select category</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+        list.innerHTML = categories.map(c => `
           <div class="product-item">
             <div>
               <div style="font-weight:700">${c.name}</div>
@@ -334,6 +343,9 @@
             <button onclick="deleteCategory('${c.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
           </div>
         `).join('');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to load categories';
+        list.textContent = `Failed to load categories: ${message}`;
       }
     }
 
@@ -376,11 +388,14 @@
       try {
         const res = await fetch(`${API_BASE}/products/brands`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
         const select = document.getElementById('brandId');
         if (!select) return;
         select.innerHTML = '<option value="">-- Select brand --</option>' + (data.brands || []).map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-      } catch {
-        // ignore
+      } catch (error) {
+        const select = document.getElementById('brandId');
+        if (select) select.innerHTML = '<option value="">Failed to load brands</option>';
+        console.error('Failed to load brands', error);
       }
     }
 
@@ -401,6 +416,7 @@
       try {
         const res = await fetch(`${API_BASE}/products?limit=3000`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
         if (!data.products || !data.products.length) {
           list.innerHTML = 'No products found.';
           return;
@@ -418,8 +434,9 @@
             </div>
           </div>
         `).join('');
-      } catch {
-        list.innerHTML = 'Failed to load products.';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to reach the API';
+        list.textContent = `Failed to load products: ${message}`;
       }
     }
 
@@ -586,6 +603,8 @@
     function logout() {
       token = null;
       localStorage.removeItem('admin_token');
+      localStorage.removeItem('jbr_token');
+      localStorage.removeItem('jbr_user');
       location.reload();
     }
 
@@ -961,6 +980,9 @@
     function showAdmin() {
       document.getElementById('loginCard').classList.add('hidden');
       document.getElementById('adminPanel').classList.remove('hidden');
+      document.getElementById('authNotice').innerHTML = token
+        ? ''
+        : 'Sign in through the <a href="/login">main site</a> to manage admin data. Public product and category listings are available without signing in.';
       document.getElementById('productsCard').classList.remove('hidden');
       document.getElementById('stockCard').classList.remove('hidden');
       document.getElementById('blogCard').classList.remove('hidden');
@@ -1050,6 +1072,7 @@
       try {
         const res = await fetch(`${API_BASE}/products/brands`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
         if (!data.brands || !data.brands.length) {
           list.innerHTML = 'No brands found.';
           return;
@@ -1062,8 +1085,9 @@
             <button onclick="deleteBrand('${b.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
           </div>
         `).join('');
-      } catch {
-        list.innerHTML = 'Failed to load brands.';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to reach the API';
+        list.textContent = `Failed to load brands: ${message}`;
       }
     }
 
@@ -1073,6 +1097,7 @@
       try {
         const res = await fetch(`${API_BASE}/blog`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
         if (!data.posts.length) {
           list.innerHTML = 'No blog posts found.';
           return;
@@ -1087,8 +1112,9 @@
             <button onclick="deleteBlog('${p.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
           </div>
         `).join('');
-      } catch {
-        list.innerHTML = 'Failed to load blog posts.';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to reach the API';
+        list.textContent = `Failed to load blog posts: ${message}`;
       }
     }
 
