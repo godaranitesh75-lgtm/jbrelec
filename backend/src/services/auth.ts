@@ -7,14 +7,18 @@ const defaultDevSecret = 'development-secret-do-not-use-in-production-change-me'
 const expiresIn = process.env.JWT_EXPIRES_IN ?? '7d';
 
 export function getJwtSecret(): Secret {
-  const configuredSecret = process.env.JWT_SECRET ?? process.env.AUTH_JWT_SECRET ?? defaultDevSecret;
+  const configuredSecret = process.env.JWT_SECRET ?? process.env.AUTH_JWT_SECRET;
 
-  if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret.length < 32 || configuredSecret === defaultDevSecret)) {
-    throw new Error('JWT_SECRET must be set to a strong secret in production.');
+  if (!configuredSecret || !configuredSecret.trim()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET must be set to a strong secret in production.');
+    }
+    // In development, fall back to a stable dev secret (never rotate per-call)
+    return defaultDevSecret;
   }
 
-  if (!process.env.JWT_SECRET && !process.env.AUTH_JWT_SECRET) {
-    return crypto.randomBytes(32).toString('hex');
+  if (process.env.NODE_ENV === 'production' && (configuredSecret.length < 32 || configuredSecret === defaultDevSecret)) {
+    throw new Error('JWT_SECRET must be set to a strong secret in production.');
   }
 
   return configuredSecret;

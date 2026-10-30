@@ -321,9 +321,9 @@ export function AdminProducts() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
       if (!res.ok) {
-        setMessage({ type: 'error', text: data.message || 'Failed to delete category' });
+        const data = await res.json().catch(() => ({}));
+        setMessage({ type: 'error', text: (data as { message?: string }).message || 'Failed to delete category' });
         return;
       }
       setMessage({ type: 'success', text: 'Category deleted successfully' });
@@ -339,25 +339,17 @@ export function AdminProducts() {
       setMessage({ type: 'error', text: 'Enter a category name to delete' });
       return;
     }
-    if (!confirm(`Delete category "${name}"?`)) return;
 
-    try {
-      const res = await fetch(`${API_BASE}/products/categories/search?name=${encodeURIComponent(name)}`);
-      const data = await res.json();
-      if (!res.ok) {
-        setMessage({ type: 'error', text: data.message || 'Failed to find category' });
-        return;
-      }
-      const category = data.categories?.find((c: { name: string }) => c.name.toLowerCase() === name.toLowerCase());
-      if (!category) {
-        setMessage({ type: 'error', text: 'Category not found' });
-        return;
-      }
-      await deleteCategory(category.id);
-      setCategoryName('');
-    } catch {
-      setMessage({ type: 'error', text: 'Error deleting category' });
+    const category = categories.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (!category) {
+      setMessage({ type: 'error', text: `Category "${name}" not found` });
+      return;
     }
+
+    if (!confirm(`Delete category "${category.name}"?`)) return;
+
+    await deleteCategory(category.id);
+    setCategoryName('');
   }
 
   if (loading) return <div className="page-shell">Loading...</div>;
