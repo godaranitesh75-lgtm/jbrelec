@@ -1,3 +1,4 @@
+C:\Users\Owner\Downloads\jbrimages\jbrelec.worktrees\main\admin-products.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,83 +7,34 @@
   <title>Product Manager</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Manrope', sans-serif;
-      background: #f4f8f6;
-      color: #0f3d3a;
-      padding: 20px;
-    }
-    .container { max-width: 900px; margin: 0 auto; }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #e2eaed;
-      box-shadow: 0 4px 20px rgba(7,89,76,.06);
-      margin-bottom: 20px;
-    }
+    body { margin: 0; font-family: 'Manrope', sans-serif; background: #f4f8f6; color: #0f3d3a; padding: 20px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #e2eaed; box-shadow: 0 4px 20px rgba(7,89,76,.06); margin-bottom: 20px; }
     h1 { margin: 0 0 16px; font-size: 22px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
     label { display: block; font-size: 12px; font-weight: 700; margin: 10px 0 6px; color: #3d5260; }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #dce6e8;
-      border-radius: 8px;
-      background: #f8fbfa;
-      color: #0f3d3a;
-      font-size: 13px;
-      outline: none;
-    }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce6e8; border-radius: 8px; background: #f8fbfa; color: #0f3d3a; font-size: 13px; outline: none; }
     textarea { min-height: 80px; resize: vertical; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .image-upload {
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      background: #f8fbfa;
-      margin-top: 8px;
-    }
-    .image-upload input { display: none; }
-    .image-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .image-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2eaed; }
-    .actions { display: flex; gap: 10px; margin-top: 16px; }
-    button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: #0d9488;
-      color: white;
-      font-weight: 800;
-      font-size: 13px;
-      cursor: pointer;
-    }
+    .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    button { padding: 10px 14px; border: none; border-radius: 8px; background: #0d9488; color: white; font-weight: 800; font-size: 13px; cursor: pointer; }
     button.secondary { background: #e2eaed; color: #0f3d3a; }
+    button.danger { background: #e11d48; }
     .status { margin-top: 10px; font-size: 13px; color: #3d5260; }
     .error { color: #e11d48; }
     .success { color: #065f46; }
-    .product-list { margin-top: 10px; }
-    .product-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      background: #f8fbfa;
-      border: 1px solid #e2eaed;
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
+    .product-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .product-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: #f8fbfa; border: 1px solid #e2eaed; border-radius: 10px; }
     .product-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2eaed; }
     .product-item .meta { font-size: 12px; color: #6b7f8c; }
     .hidden { display: none; }
+    .image-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .image-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2eaed; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card hidden" id="loginCard">
+    <div class="card" id="loginCard">
       <h1>Admin Login</h1>
       <label>Email</label>
       <input id="loginEmail" type="email" placeholder="Enter email" />
@@ -92,223 +44,81 @@
         <button onclick="login()">Login</button>
       </div>
       <div class="status" id="loginStatus"></div>
-
-      <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
-      <h2 style="font-size: 16px; margin: 0 0 10px;">Change Password by Email</h2>
-      <label>Admin Email</label>
-      <input id="resetEmail" type="email" placeholder="admin@example.com" />
-      <label>Current Password</label>
-      <input id="resetCurrentPassword" type="password" autocomplete="current-password" placeholder="Enter current password" />
-      <label>New Password</label>
-      <input id="resetPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
-      <label>Confirm New Password</label>
-      <input id="resetConfirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter new password" />
-      <div class="actions">
-        <button class="secondary" onclick="resetPasswordByEmail()">Change Password</button>
-      </div>
-      <div class="status" id="resetPasswordStatus"></div>
     </div>
 
     <div class="card hidden" id="adminPanel">
-      <h1>Account Security</h1>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h1 style="margin: 0;">Admin Panel</h1>
+        <button class="secondary" onclick="logout()">Logout</button>
+      </div>
       <div class="status" id="authNotice"></div>
+
+      <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
+
+      <h2>Change Password</h2>
       <div class="row">
-        <div>
-          <label>Current Password</label>
-          <input id="currentPassword" type="password" autocomplete="current-password" placeholder="Enter current password" />
-        </div>
-        <div>
-          <label>New Password</label>
-          <input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
-        </div>
+        <div><label>Current Password</label><input id="currentPassword" type="password" /></div>
+        <div><label>New Password</label><input id="newPassword" type="password" /></div>
       </div>
       <label>Confirm New Password</label>
-      <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter new password" />
-      <div class="actions">
-        <button onclick="changePassword()">Change Password</button>
-      </div>
+      <input id="confirmPassword" type="password" />
+      <div class="actions"><button onclick="changePassword()">Change Password</button></div>
       <div class="status" id="passwordStatus"></div>
 
       <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
 
-      <h1>Add Category</h1>
+      <h2>Categories</h2>
       <div class="row">
-        <div>
-          <label>Category Name</label>
-          <input id="categoryName" placeholder="e.g. Switches & Sockets" />
-        </div>
-        <div style="display: flex; align-items: flex-end; gap: 10px;">
-          <button onclick="submitCategory()" style="margin-bottom: 0;">Add Category</button>
-        </div>
+        <div><label>Category Name</label><input id="categoryName" placeholder="e.g. Switches & Sockets" /></div>
+        <div style="display: flex; align-items: flex-end;"><button onclick="submitCategory()">Add Category</button></div>
       </div>
-      <div class="status" id="categoryStatus" style="margin-bottom: 20px;"></div>
-
-      <div id="categoryList" style="margin-bottom: 20px;"></div>
+      <div class="status" id="categoryStatus"></div>
+      <div id="categoryList" style="margin-top: 12px;"></div>
 
       <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
 
-      <h1>Add Product</h1>
-
-      <div class="row">
-        <div>
-          <label>Product Name</label>
-          <input id="name" placeholder="e.g. House wire" />
-        </div>
-        <div>
-          <label>Category</label>
-          <select id="categoryId">
-            <option value="">Select category</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>SKU</label>
-          <input id="sku" placeholder="Unique SKU" />
-        </div>
-        <div>
-          <label>Brand</label>
-          <select id="brandId">
-            <option value="">-- Select brand --</option>
-          </select>
-        </div>
-      </div>
-
+      <h2>Add/Edit Product</h2>
       <input type="hidden" id="productId" value="" />
-
-      <label>Description</label>
-      <textarea id="description" placeholder="Short description"></textarea>
-
       <div class="row">
-        <div>
-          <label>Price (₹)</label>
-          <input id="price" type="number" placeholder="0" />
-        </div>
-        <div>
-          <label>Sale Price (₹)</label>
-          <input id="salePrice" type="number" placeholder="Optional" />
-        </div>
+        <div><label>Product Name *</label><input id="name" /></div>
+        <div><label>SKU *</label><input id="sku" /></div>
       </div>
-
       <div class="row">
-        <div>
-          <label>Stock</label>
-          <input id="stock" type="number" placeholder="0" />
-        </div>
-        <div>
-          <label>Specifications</label>
-          <input id="specifications" placeholder='{"size":"1.5 sqmm","unit":"meter"}' />
-        </div>
+        <div><label>Category *</label><select id="categoryId"><option value="">Select category</option></select></div>
+        <div><label>Brand</label><select id="brandId"><option value="">-- Select brand --</option></select></div>
       </div>
-
-      <label>Product Photos</label>
-      <div id="dropZone" style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; background: #f8fbfa; margin-top: 8px; transition: all .2s;">
-        <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
-        <p style="margin: 0; font-weight: 700; color: #0f3d3a;">Drop product photos here</p>
-        <p style="margin: 4px 0 0; font-size: 12px; color: #6b7f8c;">or click to browse from your device</p>
-        <input id="images" type="file" accept="image/*" multiple style="display: none;" />
+      <label>Description</label><textarea id="description"></textarea>
+      <div class="row">
+        <div><label>Price (₹) *</label><input id="price" type="number" /></div>
+        <div><label>Sale Price (₹)</label><input id="salePrice" type="number" /></div>
       </div>
+      <div class="row">
+        <div><label>Stock *</label><input id="stock" type="number" /></div>
+        <div><label>Specifications (JSON)</label><input id="specifications" placeholder='{"size":"1.5 sqmm"}' /></div>
+      </div>
+      <label>Images</label>
+      <input type="file" id="images" accept="image/*" multiple />
       <div class="image-preview" id="imagePreview"></div>
-
       <div class="actions">
         <button onclick="submitProduct()" id="productSubmitBtn">Save Product</button>
         <button class="secondary" onclick="resetForm()">Reset</button>
-        <button class="secondary" onclick="logout()">Logout</button>
       </div>
       <div class="status" id="status"></div>
-    </div>
-
-    <div class="card hidden" id="productsCard">
-      <h1>Products</h1>
-      <div class="product-list" id="productList">Loading...</div>
-    </div>
-
-    <div class="card hidden" id="stockCard">
-      <h1>Add Stock</h1>
-      <label>Search Product</label>
-      <input id="stockSearch" placeholder="Search by name or SKU..." oninput="searchStockProducts()" />
-      <div id="stockSearchResults" style="margin-top:8px;"></div>
-
-      <div id="stockForm" class="hidden" style="margin-top:16px;">
-        <label>Selected Product</label>
-        <input id="stockProductName" readonly />
-        <input type="hidden" id="stockProductId" />
-
-        <label>Current Stock</label>
-        <input id="stockCurrent" readonly />
-
-        <label>Add Quantity</label>
-        <input id="stockAddQty" type="number" placeholder="Enter quantity to add" />
-
-        <div class="actions">
-          <button onclick="updateStock()">Update Stock</button>
-          <button class="secondary" onclick="resetStockForm()">Reset</button>
-        </div>
-        <div class="status" id="stockStatus"></div>
-      </div>
-    </div>
-
-    <div class="card hidden" id="brandsCard">
-      <h1>Manage Brands</h1>
-      <div class="row">
-        <div>
-          <label>Brand Name</label>
-          <input id="brandName" placeholder="e.g. JBR Power" />
-        </div>
-        <div style="display: flex; align-items: flex-end; gap: 10px;">
-          <button onclick="submitBrand()" style="margin-bottom: 0;">Add Brand</button>
-        </div>
-      </div>
-      <div class="status" id="brandStatus" style="margin-bottom: 20px;"></div>
-      <div id="brandList" style="margin-bottom: 20px;"></div>
-    </div>
-
-    <div class="card hidden" id="blogCard">
-      <h1>Blog Posts</h1>
-
-      <div class="row">
-        <div>
-          <label>Title</label>
-          <input id="blogTitle" placeholder="Blog post title" />
-        </div>
-        <div>
-          <label>Slug</label>
-          <input id="blogSlug" placeholder="url-friendly-slug" />
-        </div>
-      </div>
-
-      <label>Excerpt</label>
-      <input id="blogExcerpt" placeholder="Short summary" />
-
-      <label>Content</label>
-      <textarea id="blogContent" rows="6" placeholder="Full blog content..."></textarea>
-
-      <div class="row">
-        <div>
-          <label>Cover Image URL</label>
-          <input id="blogCoverImage" placeholder="https://example.com/image.jpg" />
-        </div>
-        <div style="display:flex;align-items:flex-end;gap:10px;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="blogPublished" />
-            Published
-          </label>
-        </div>
-      </div>
-
-      <input type="hidden" id="blogId" value="" />
-
-      <div class="actions">
-        <button onclick="submitBlog()" id="blogSubmitBtn">Save Blog Post</button>
-        <button class="secondary" onclick="resetBlogForm()">Reset</button>
-      </div>
-      <div class="status" id="blogStatus"></div>
 
       <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
 
-      <h2 style="font-size:16px;margin:0 0 12px;">All Posts</h2>
-      <div class="product-list" id="blogList">Loading...</div>
+      <h2>Products</h2>
+      <div class="product-list" id="productList">Loading...</div>
+
+      <hr style="border: none; border-top: 1px solid #e2eaed; margin: 20px 0;" />
+
+      <h2>Brands</h2>
+      <div class="row">
+        <div><label>Brand Name</label><input id="brandName" /></div>
+        <div style="display: flex; align-items: flex-end;"><button onclick="submitBrand()">Add Brand</button></div>
+      </div>
+      <div class="status" id="brandStatus"></div>
+      <div id="brandList" style="margin-top: 12px;"></div>
     </div>
   </div>
 
@@ -318,169 +128,17 @@
       if (window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local')) {
         return 'http://localhost:4000/api';
       }
-      return 'https://jbrelec.onrender.com/api';
+      return '/api';
     })();
     let token = localStorage.getItem('jbr_token') || localStorage.getItem('admin_token');
     let uploadedImages = [];
+    let currentProducts = [];
 
-    async function loadCategories() {
-      const list = document.getElementById('categoryList');
-      try {
-        const res = await fetch(`${API_BASE}/products/categories`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
-
-        const categories = data.categories || [];
-        const select = document.getElementById('categoryId');
-        if (select) {
-          select.innerHTML = '<option value="">Select category</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        }
-        list.innerHTML = categories.map(c => `
-          <div class="product-item">
-            <div>
-              <div style="font-weight:700">${c.name}</div>
-            </div>
-            <button onclick="deleteCategory('${c.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to load categories';
-        list.textContent = `Failed to load categories: ${message}`;
-      }
-    }
-
-    async function deleteCategory(id) {
-      if (!confirm('Delete this category?')) return;
-      try {
-        const res = await fetch(`${API_BASE}/products/categories/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.status === 401) {
-          alert('Unauthorized. Please login first.');
-          return;
-        }
-        if (!res.ok) {
-          const data = await res.json();
-          alert(data.message || 'Failed to delete category');
-          return;
-        }
-        loadCategories();
-      } catch {
-        alert('Error deleting category');
-      }
-    }
-
-    async function loadBrandId() {
-      try {
-        const res = await fetch(`${API_BASE}/products/brands`);
-        const data = await res.json();
-        const brand = data.brands?.[0];
-        if (brand?.id) {
-          window.__defaultBrandId = brand.id;
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    async function loadBrands() {
-      try {
-        const res = await fetch(`${API_BASE}/products/brands`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
-        const select = document.getElementById('brandId');
-        if (!select) return;
-        select.innerHTML = '<option value="">-- Select brand --</option>' + (data.brands || []).map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-      } catch (error) {
-        const select = document.getElementById('brandId');
-        if (select) select.innerHTML = '<option value="">Failed to load brands</option>';
-        console.error('Failed to load brands', error);
-      }
-    }
-
-    async function loadDefaultCategory() {
-      try {
-        const res = await fetch(`${API_BASE}/products/categories`);
-        const data = await res.json();
-        if (data.categories && data.categories.length > 0) {
-          window.__defaultCategoryId = data.categories[0].id;
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    async function loadProducts() {
-      const list = document.getElementById('productList');
-      try {
-        const res = await fetch(`${API_BASE}/products?limit=3000`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
-        if (!data.products || !data.products.length) {
-          list.innerHTML = 'No products found.';
-          return;
-        }
-        list.innerHTML = data.products.map(p => `
-          <div class="product-item">
-            <div>
-              <div style="font-weight:700">${p.name}</div>
-              <div class="meta">SKU: ${p.sku} · ₹${p.price} · Stock: ${p.stock}</div>
-            </div>
-            ${p.images && p.images.length ? `<img src="${p.images[0]}" />` : ''}
-            <div style="display:flex;align-items:center;gap:8px;">
-              <button onclick="editProduct('${p.id}')" style="padding: 4px 10px; font-size: 12px; background: #0d9488; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-              <button onclick="deleteProduct('${p.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to reach the API';
-        list.textContent = `Failed to load products: ${message}`;
-      }
-    }
-
-    document.getElementById('images').addEventListener('change', async (e) => {
-      await handleFiles(Array.from(e.target.files));
-    });
-
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('click', () => document.getElementById('images').click());
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.style.borderColor = '#0d9488';
-      dropZone.style.background = '#f0fdfa';
-    });
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.style.borderColor = '#cbd5e1';
-      dropZone.style.background = '#f8fbfa';
-    });
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.style.borderColor = '#cbd5e1';
-      dropZone.style.background = '#f8fbfa';
-      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-      if (files.length) handleFiles(files);
-    });
-
-    async function handleFiles(files) {
-      uploadedImages = [];
-      const preview = document.getElementById('imagePreview');
-      preview.innerHTML = '';
-      const promises = Array.from(files).map((file) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            uploadedImages.push(ev.target.result);
-            const img = document.createElement('img');
-            img.src = ev.target.result;
-            preview.appendChild(img);
-            resolve();
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-      await Promise.all(promises);
+    function showAdmin() {
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('adminPanel').classList.remove('hidden');
+      document.getElementById('authNotice').innerHTML = token ? '' : '<span class="error">No token found.</span>';
+      loadCategories(); loadBrands(); loadProducts(); loadBrandList();
     }
 
     async function login() {
@@ -489,765 +147,209 @@
       const status = document.getElementById('loginStatus');
       status.className = 'status';
       status.textContent = 'Logging in...';
-
       try {
-        const res = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+        const res = await fetch(API_BASE + '/auth/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) });
         const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Login failed';
-          return;
-        }
+        if (!res.ok) { status.className = 'status error'; status.textContent = data.message || 'Failed'; return; }
         token = data.token;
-        localStorage.setItem('admin_token', token);
-        showAdmin();
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = 'Login error';
-      }
+        localStorage.setItem('jbr_token', token);
+        status.className = 'status success'; status.textContent = 'Success';
+        setTimeout(() => showAdmin(), 200);
+      } catch (err) { status.className = 'status error'; status.textContent = 'Error: ' + err.message; }
     }
 
-    async function resetPasswordByEmail() {
-      const status = document.getElementById('resetPasswordStatus');
-      const email = document.getElementById('resetEmail').value.trim();
-      const currentPassword = document.getElementById('resetCurrentPassword').value;
-      const newPassword = document.getElementById('resetPassword').value;
-      const confirmPassword = document.getElementById('resetConfirmPassword').value;
-      status.className = 'status';
-
-      if (!email || !currentPassword || !newPassword || !confirmPassword) {
-        status.className = 'status error';
-        status.textContent = 'Complete all password fields';
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        status.className = 'status error';
-        status.textContent = 'New passwords do not match';
-        return;
-      }
-
-      status.textContent = 'Changing password...';
-      try {
-        const res = await fetch(`${API_BASE}/auth/reset-password`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, currentPassword, newPassword })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to change password';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = data.message;
-        document.getElementById('resetPassword').value = '';
-        document.getElementById('resetConfirmPassword').value = '';
-      } catch {
-        status.className = 'status error';
-        status.textContent = 'Error changing password';
-      }
-    }
+    function logout() { localStorage.removeItem('jbr_token'); localStorage.removeItem('admin_token'); location.reload(); }
 
     async function changePassword() {
       const status = document.getElementById('passwordStatus');
       const currentPassword = document.getElementById('currentPassword').value;
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
-      status.className = 'status';
-
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        status.className = 'status error';
-        status.textContent = 'Complete all password fields';
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        status.className = 'status error';
-        status.textContent = 'New passwords do not match';
-        return;
-      }
-
-      status.textContent = 'Changing password...';
+      if (!currentPassword || !newPassword || !confirmPassword) { status.className = 'status error'; status.textContent = 'All fields required'; return; }
+      if (newPassword !== confirmPassword) { status.className = 'status error'; status.textContent = 'Passwords do not match'; return; }
       try {
-        const res = await fetch(`${API_BASE}/account/password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ currentPassword, newPassword })
-        });
+        const res = await fetch(API_BASE + '/account/password', { method: 'POST', headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + token}, body: JSON.stringify({currentPassword, newPassword}) });
         const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to change password';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = data.message;
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-      } catch {
-        status.className = 'status error';
-        status.textContent = 'Error changing password';
-      }
+        status.className = res.ok ? 'status success' : 'status error';
+        status.textContent = data.message || (res.ok ? 'Success' : 'Failed');
+        if (res.ok) { document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmPassword').value = ''; }
+      } catch { status.className = 'status error'; status.textContent = 'Error'; }
     }
 
-    function logout() {
-      token = null;
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('jbr_token');
-      localStorage.removeItem('jbr_user');
-      location.reload();
+    async function loadCategories() {
+      try {
+        const res = await fetch(API_BASE + '/products/categories');
+        const data = await res.json();
+        const categories = data.categories || [];
+        const select = document.getElementById('categoryId');
+        select.innerHTML = '<option value="">Select category</option>' + categories.map(c => '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>').join('');
+        const list = document.getElementById('categoryList');
+        list.innerHTML = categories.map(c => '<div style="display: flex; justify-content: space-between; padding: 6px 10px; background: #f8fbfa; border-radius: 6px;"><span>' + escapeHtml(c.name) + '</span><button class="danger" style="padding: 2px 8px; font-size: 11px;" onclick="deleteCategory(\'' + c.id + '\')">Delete</button></div>').join('');
+      } catch {}
     }
 
     async function submitCategory() {
+      const name = document.getElementById('categoryName').value.trim();
+      if (!name) return;
       const status = document.getElementById('categoryStatus');
-      status.className = 'status';
-      status.textContent = 'Saving...';
-
-      const name = document.getElementById('categoryName').value.trim();
-      if (!name) {
-        status.className = 'status error';
-        status.textContent = 'Category name is required';
-        return;
-      }
-
       try {
-        const res = await fetch(`${API_BASE}/products/categories`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ name })
-        });
-
-        if (res.status === 401) {
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-
+        const res = await fetch(API_BASE + '/products/categories', { method: 'POST', headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + token}, body: JSON.stringify({name}) });
         const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to save category';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = 'Category added successfully.';
-        document.getElementById('categoryName').value = '';
-        loadCategories();
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = 'Error saving category';
-      }
+        status.className = res.ok ? 'status success' : 'status error';
+        status.textContent = res.ok ? 'Added' : (data.message || 'Failed');
+        if (res.ok) { document.getElementById('categoryName').value = ''; loadCategories(); }
+      } catch { status.className = 'status error'; status.textContent = 'Error'; }
     }
 
-    async function deleteCategoryByName() {
-      const name = document.getElementById('categoryName').value.trim();
-      if (!name) {
-        const status = document.getElementById('categoryStatus');
-        status.className = 'status error';
-        status.textContent = 'Enter a category name to delete';
-        return;
-      }
-
-      if (!confirm(`Delete category "${name}"?`)) return;
-
-      try {
-        const res = await fetch(`${API_BASE}/products/categories/search?name=${encodeURIComponent(name)}`);
-        const data = await res.json();
-        if (!res.ok) {
-          const status = document.getElementById('categoryStatus');
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to find category';
-          return;
-        }
-
-        const category = data.categories?.find((c) => c.name.toLowerCase() === name.toLowerCase());
-        if (!category) {
-          const status = document.getElementById('categoryStatus');
-          status.className = 'status error';
-          status.textContent = 'Category not found';
-          return;
-        }
-
-        const deleteRes = await fetch(`${API_BASE}/products/categories/${category.id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (deleteRes.status === 401) {
-          const status = document.getElementById('categoryStatus');
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-
-        const deleteData = await deleteRes.json();
-        if (!deleteRes.ok) {
-          const status = document.getElementById('categoryStatus');
-          status.className = 'status error';
-          status.textContent = deleteData.message || 'Failed to delete category';
-          return;
-        }
-
-        const status = document.getElementById('categoryStatus');
-        status.className = 'status success';
-        status.textContent = 'Category deleted successfully.';
-        document.getElementById('categoryName').value = '';
-        loadCategories();
-      } catch (err) {
-        const status = document.getElementById('categoryStatus');
-        status.className = 'status error';
-        status.textContent = 'Error deleting category';
-      }
+    async function deleteCategory(id) {
+      if (!confirm('Delete?')) return;
+      try { const res = await fetch(API_BASE + '/products/categories/' + id, { method: 'DELETE', headers: {Authorization: 'Bearer ' + token} }); if (res.ok) loadCategories(); } catch {}
     }
 
-    function generateSlug(name) {
-      return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    async function loadBrands() {
+      try {
+        const res = await fetch(API_BASE + '/products/brands');
+        const data = await res.json();
+        const brands = data.brands || [];
+        const select = document.getElementById('brandId');
+        select.innerHTML = '<option value="">-- Select brand --</option>' + brands.map(b => '<option value="' + b.id + '">' + escapeHtml(b.name) + '</option>').join('');
+      } catch {}
+    }
+
+    async function loadBrandList() {
+      try {
+        const res = await fetch(API_BASE + '/products/brands');
+        const data = await res.json();
+        const brands = data.brands || [];
+        const list = document.getElementById('brandList');
+        list.innerHTML = brands.map(b => '<div style="display: flex; justify-content: space-between; padding: 6px 10px; background: #f8fbfa; border-radius: 6px;"><span>' + escapeHtml(b.name) + '</span><button class="danger" style="padding: 2px 8px; font-size: 11px;" onclick="deleteBrand(\'' + b.id + '\')">Delete</button></div>').join('');
+      } catch {}
+    }
+
+    async function submitBrand() {
+      const name = document.getElementById('brandName').value.trim();
+      if (!name) return;
+      const status = document.getElementById('brandStatus');
+      try {
+        const res = await fetch(API_BASE + '/products/brands', { method: 'POST', headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + token}, body: JSON.stringify({name}) });
+        const data = await res.json();
+        status.className = res.ok ? 'status success' : 'status error';
+        status.textContent = res.ok ? 'Added' : (data.message || 'Failed');
+        if (res.ok) { document.getElementById('brandName').value = ''; loadBrands(); loadBrandList(); }
+      } catch { status.className = 'status error'; status.textContent = 'Error'; }
+    }
+
+    async function deleteBrand(id) {
+      if (!confirm('Delete?')) return;
+      try { const res = await fetch(API_BASE + '/products/brands/' + id, { method: 'DELETE', headers: {Authorization: 'Bearer ' + token} }); if (res.ok) { loadBrands(); loadBrandList(); } } catch {}
+    }
+
+    document.getElementById('images').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files || []);
+      uploadedImages = [];
+      const preview = document.getElementById('imagePreview');
+      preview.innerHTML = '';
+      for (const file of files.slice(0, 5)) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          uploadedImages.push(ev.target.result);
+          const img = document.createElement('img'); img.src = ev.target.result; preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    async function loadProducts() {
+      const list = document.getElementById('productList');
+      list.innerHTML = 'Loading...';
+      try {
+        const res = await fetch(API_BASE + '/products?limit=3000');
+        const data = await res.json();
+        currentProducts = data.products || [];
+        if (currentProducts.length === 0) { list.innerHTML = 'No products'; return; }
+        list.innerHTML = currentProducts.map(p => '<div class="product-item"><div><div style="font-weight: 700;">' + escapeHtml(p.name) + '</div><div class="meta">SKU: ' + escapeHtml(p.sku) + ' | ₹' + p.price + ' | Stock: ' + p.stock + '</div></div><div style="display: flex; gap: 6px;"><button style="padding: 4px 10px; font-size: 12px;" onclick="editProduct(\'' + p.id + '\')">Edit</button><button class="danger" style="padding: 4px 10px; font-size: 12px;" onclick="deleteProduct(\'' + p.id + '\')">Delete</button></div></div>').join('');
+      } catch { list.innerHTML = '<span class="error">Failed</span>'; }
+    }
+
+    function editProduct(id) {
+      const p = currentProducts.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('productId').value = p.id;
+      document.getElementById('name').value = p.name || '';
+      document.getElementById('sku').value = p.sku || '';
+      document.getElementById('description').value = p.description || '';
+      document.getElementById('price').value = p.price || '';
+      document.getElementById('salePrice').value = p.salePrice || '';
+      document.getElementById('stock').value = p.stock || '';
+      document.getElementById('specifications').value = p.specifications ? JSON.stringify(p.specifications) : '';
+      document.getElementById('categoryId').value = p.categoryId || '';
+      if (p.brandId) document.getElementById('brandId').value = p.brandId;
+      uploadedImages = p.images || [];
+      const preview = document.getElementById('imagePreview');
+      preview.innerHTML = uploadedImages.map(img => '<img src="' + img + '" />').join('');
+      document.getElementById('productSubmitBtn').textContent = 'Update Product';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function submitProduct() {
       const status = document.getElementById('status');
-      status.className = 'status';
-      status.textContent = 'Saving...';
-
       const productId = document.getElementById('productId').value;
       const isEdit = !!productId;
       const name = document.getElementById('name').value.trim();
       const sku = document.getElementById('sku').value.trim();
-
-      if (!name || !sku) {
-        status.className = 'status error';
-        status.textContent = 'Product name and SKU are required';
-        return;
-      }
-
+      const categoryId = document.getElementById('categoryId').value;
+      const price = document.getElementById('price').value;
+      const stock = document.getElementById('stock').value;
       const specifications = document.getElementById('specifications').value.trim();
-      if (specifications) {
-        try {
-          JSON.parse(specifications);
-        } catch {
-          status.className = 'status error';
-          status.textContent = 'Specifications must be valid JSON.';
-          return;
-        }
-      }
-
-      const slugBase = generateSlug(name) || 'product';
-      const slugSuffix = generateSlug(sku) || crypto.randomUUID();
-      const payload = {
-        categoryId: document.getElementById('categoryId').value || window.__defaultCategoryId || '',
-        sku: sku,
-        slug: `${slugBase}-${slugSuffix}`,
-        name: name,
-        description: document.getElementById('description').value,
-        brandId: document.getElementById('brandId').value || window.__defaultBrandId || null,
-        images: uploadedImages,
-        price: Number(document.getElementById('price').value || 0),
-        salePrice: document.getElementById('salePrice').value ? Number(document.getElementById('salePrice').value) : undefined,
-        stock: Number(document.getElementById('stock').value || 0),
-        specifications: specifications || undefined,
-        status: 'ACTIVE'
-      };
-
+      if (!name || !sku || !categoryId || price === '' || stock === '') { status.className = 'status error'; status.textContent = 'Required fields missing'; return; }
+      if (specifications) { try { JSON.parse(specifications); } catch { status.className = 'status error'; status.textContent = 'Invalid JSON'; return; } }
+      const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+      const payload = { name, sku, slug: slugBase + '-' + Date.now(), categoryId, brandId: document.getElementById('brandId').value || null, description: document.getElementById('description').value, price: Number(price), salePrice: document.getElementById('salePrice').value ? Number(document.getElementById('salePrice').value) : undefined, stock: Number(stock), images: uploadedImages, specifications: specifications || undefined, status: 'ACTIVE' };
       try {
-        const url = isEdit ? `${API_BASE}/products/${productId}` : `${API_BASE}/products`;
+        const url = isEdit ? API_BASE + '/products/' + productId : API_BASE + '/products';
         const method = isEdit ? 'PUT' : 'POST';
-
-        const res = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (res.status === 401) {
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-
+        const res = await fetch(url, { method, headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + token}, body: JSON.stringify(payload) });
         const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to save';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = isEdit ? 'Product updated successfully.' : 'Product saved successfully.';
-        resetForm();
-        loadProducts();
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = `Error saving product: ${err instanceof Error ? err.message : 'Unexpected error.'}`;
-      }
-    }
-
-    async function editProduct(id) {
-      try {
-        const res = await fetch(`${API_BASE}/products/${id}`);
-        const product = await res.json();
-
-        if (!res.ok) {
-          alert('Failed to load product: ' + (product.message || 'Unknown error'));
-          return;
-        }
-
-        document.getElementById('productId').value = product.id;
-        document.getElementById('name').value = product.name || '';
-        document.getElementById('sku').value = product.sku || '';
-        document.getElementById('description').value = product.description || '';
-        document.getElementById('price').value = product.price || '';
-        document.getElementById('salePrice').value = product.salePrice || '';
-        document.getElementById('stock').value = product.stock || '';
-        document.getElementById('specifications').value = product.specifications ? JSON.stringify(product.specifications) : '';
-        document.getElementById('categoryId').value = product.categoryId || '';
-
-        if (product.brandId) {
-          document.getElementById('brandId').value = product.brandId;
-        }
-
-        if (product.images && product.images.length > 0) {
-          uploadedImages = product.images;
-          const preview = document.getElementById('imagePreview');
-          preview.innerHTML = product.images.map(img => `<img src="${img}" alt="" />`).join('');
-        } else {
-          uploadedImages = [];
-          document.getElementById('imagePreview').innerHTML = '';
-        }
-
-        document.getElementById('productSubmitBtn').textContent = 'Update Product';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) {
-        alert('Error loading product for editing');
-      }
+        status.className = res.ok ? 'status success' : 'status error';
+        status.textContent = res.ok ? (isEdit ? 'Updated' : 'Created') : (data.message || 'Failed');
+        if (res.ok) { resetForm(); loadProducts(); }
+      } catch { status.className = 'status error'; status.textContent = 'Error'; }
     }
 
     async function deleteProduct(id) {
-      if (!confirm('Delete this product?')) return;
-      let deleted = false;
-      try {
-        const res = await fetch(`${API_BASE}/products/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.status === 401) {
-          alert('Unauthorized. Please login first.');
-          return;
-        }
-        if (!res.ok) {
-          const data = await res.json();
-          alert(data.message || 'Failed to delete product');
-          return;
-        }
-        deleted = true;
-      } catch {
-        alert('Error deleting product');
-        return;
-      } finally {
-        try {
-          await loadProducts();
-        } catch {
-          if (!deleted) {
-            alert('Error refreshing product list');
-          }
-        }
-      }
-    }
-
-    let stockSearchTimeout;
-    async function searchStockProducts() {
-      const query = document.getElementById('stockSearch').value.trim();
-      const results = document.getElementById('stockSearchResults');
-      if (stockSearchTimeout) clearTimeout(stockSearchTimeout);
-      if (!query) {
-        results.innerHTML = '';
-        return;
-      }
-      stockSearchTimeout = setTimeout(async () => {
-        try {
-          const res = await fetch(`${API_BASE}/products?limit=20`);
-          const data = await res.json();
-          const matches = (data.products || []).filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.sku.toLowerCase().includes(query.toLowerCase()));
-          if (!matches.length) {
-            results.innerHTML = '<div style="font-size:12px;color:#6b7f8c;margin-top:4px;">No products found</div>';
-            return;
-          }
-          results.innerHTML = matches.map(p => `
-            <div class="product-item" style="cursor:pointer;" onclick="selectStockProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.stock})">
-              <div>
-                <div style="font-weight:700">${p.name}</div>
-                <div class="meta">SKU: ${p.sku} · Stock: ${p.stock}</div>
-              </div>
-            </div>
-          `).join('');
-        } catch {
-          results.innerHTML = '<div style="font-size:12px;color:#e11d48;margin-top:4px;">Search failed</div>';
-        }
-      }, 200);
-    }
-
-    function selectStockProduct(id, name, stock) {
-      document.getElementById('stockProductId').value = id;
-      document.getElementById('stockProductName').value = name;
-      document.getElementById('stockCurrent').value = stock;
-      document.getElementById('stockForm').classList.remove('hidden');
-      document.getElementById('stockAddQty').value = '';
-      document.getElementById('stockStatus').textContent = '';
-      document.getElementById('stockSearchResults').innerHTML = '';
-      document.getElementById('stockSearch').value = name;
-    }
-
-    async function updateStock() {
-      const status = document.getElementById('stockStatus');
-      status.className = 'status';
-      status.textContent = 'Updating...';
-      const id = document.getElementById('stockProductId').value;
-      const addQty = Number(document.getElementById('stockAddQty').value);
-      const currentStock = Number(document.getElementById('stockCurrent').value) || 0;
-      if (!id || !addQty || addQty <= 0) {
-        status.className = 'status error';
-        status.textContent = 'Please select a product and enter a valid quantity';
-        return;
-      }
-      try {
-        const res = await fetch(`${API_BASE}/products/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ stock: currentStock + addQty })
-        });
-        if (res.status === 401) {
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-        if (!res.ok) {
-          const data = await res.json();
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to update stock';
-          return;
-        }
-        const updated = await res.json();
-        status.className = 'status success';
-        status.textContent = `Stock updated. New stock: ${updated.stock}`;
-        document.getElementById('stockCurrent').value = updated.stock;
-        document.getElementById('stockAddQty').value = '';
-        loadProducts();
-      } catch {
-        status.className = 'status error';
-        status.textContent = 'Error updating stock';
-      }
-    }
-
-    function resetStockForm() {
-      document.getElementById('stockSearch').value = '';
-      document.getElementById('stockSearchResults').innerHTML = '';
-      document.getElementById('stockForm').classList.add('hidden');
-      document.getElementById('stockProductId').value = '';
-      document.getElementById('stockProductName').value = '';
-      document.getElementById('stockCurrent').value = '';
-      document.getElementById('stockAddQty').value = '';
-      document.getElementById('stockStatus').textContent = '';
+      if (!confirm('Delete?')) return;
+      try { const res = await fetch(API_BASE + '/products/' + id, { method: 'DELETE', headers: {Authorization: 'Bearer ' + token} }); if (res.ok) loadProducts(); } catch {}
     }
 
     function resetForm() {
+      document.getElementById('productId').value = '';
       document.getElementById('name').value = '';
       document.getElementById('sku').value = '';
       document.getElementById('description').value = '';
-      document.getElementById('brandId').value = '';
       document.getElementById('price').value = '';
       document.getElementById('salePrice').value = '';
       document.getElementById('stock').value = '';
       document.getElementById('specifications').value = '';
       document.getElementById('categoryId').value = '';
-      document.getElementById('imagePreview').innerHTML = '';
-      document.getElementById('productId').value = '';
+      document.getElementById('brandId').value = '';
       uploadedImages = [];
+      document.getElementById('imagePreview').innerHTML = '';
+      document.getElementById('images').value = '';
+      document.getElementById('productSubmitBtn').textContent = 'Save Product';
       document.getElementById('status').textContent = '';
-      document.getElementById('categoryName').value = '';
-      document.getElementById('categoryStatus').textContent = '';
-      document.getElementById('brandName').value = '';
-      document.getElementById('brandStatus').textContent = '';
-      const submitBtn = document.getElementById('productSubmitBtn');
-      if (submitBtn) submitBtn.textContent = 'Save Product';
     }
 
-    function showAdmin() {
-      document.getElementById('loginCard').classList.add('hidden');
-      document.getElementById('adminPanel').classList.remove('hidden');
-      document.getElementById('authNotice').innerHTML = token
-        ? ''
-        : 'Sign in through the <a href="/login">main site</a> to manage admin data. Public product and category listings are available without signing in.';
-      document.getElementById('productsCard').classList.remove('hidden');
-      document.getElementById('stockCard').classList.remove('hidden');
-      document.getElementById('blogCard').classList.remove('hidden');
-      document.getElementById('brandsCard').classList.remove('hidden');
-      loadCategories();
-      loadDefaultCategory();
-      loadBrandId();
-      loadBrands();
-      loadProducts();
-      loadBlogPosts();
-      loadBrandList();
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
-    showAdmin();
-
-    async function submitBrand() {
-      const status = document.getElementById('brandStatus');
-      status.className = 'status';
-      status.textContent = 'Saving...';
-
-      const name = document.getElementById('brandName').value.trim();
-      if (!name) {
-        status.className = 'status error';
-        status.textContent = 'Brand name is required';
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/products/brands`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ name })
-        });
-
-        if (res.status === 401) {
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-
-        const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to save brand';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = 'Brand added successfully.';
-        document.getElementById('brandName').value = '';
-        loadBrands();
-        loadBrandList();
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = 'Error saving brand';
-      }
-    }
-
-    async function deleteBrand(id) {
-      if (!confirm('Delete this brand?')) return;
-      try {
-        const res = await fetch(`${API_BASE}/products/brands/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.status === 401) {
-          alert('Unauthorized. Please login first.');
-          return;
-        }
-        if (!res.ok) {
-          const data = await res.json();
-          alert(data.message || 'Failed to delete brand');
-          return;
-        }
-        loadBrands();
-        loadBrandList();
-      } catch {
-        alert('Error deleting brand');
-      }
-    }
-
-    async function loadBrandList() {
-      const list = document.getElementById('brandList');
-      try {
-        const res = await fetch(`${API_BASE}/products/brands`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
-        if (!data.brands || !data.brands.length) {
-          list.innerHTML = 'No brands found.';
-          return;
-        }
-        list.innerHTML = data.brands.map(b => `
-          <div class="product-item">
-            <div>
-              <div style="font-weight:700">${b.name}</div>
-            </div>
-            <button onclick="deleteBrand('${b.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to reach the API';
-        list.textContent = `Failed to load brands: ${message}`;
-      }
-    }
-
-    async function loadBlogPosts() {
-      const list = document.getElementById('blogList');
-      list.innerHTML = 'Loading...';
-      try {
-        const res = await fetch(`${API_BASE}/blog`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
-        if (!data.posts.length) {
-          list.innerHTML = 'No blog posts found.';
-          return;
-        }
-        list.innerHTML = data.posts.map(p => `
-          <div class="product-item">
-            <div style="flex:1">
-              <div style="font-weight:700">${p.title}</div>
-              <div class="meta">${p.slug} · ${p.published ? 'Published' : 'Draft'} · ${new Date(p.createdAt).toLocaleDateString()}</div>
-            </div>
-            <button onclick="editBlog('${p.slug}')" style="padding: 4px 10px; font-size: 12px; background: #0d9488; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-            <button onclick="deleteBlog('${p.id}')" style="padding: 4px 10px; font-size: 12px; background: #e11d48; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to reach the API';
-        list.textContent = `Failed to load blog posts: ${message}`;
-      }
-    }
-
-    async function submitBlog() {
-      const status = document.getElementById('blogStatus');
-      status.className = 'status';
-      status.textContent = 'Saving...';
-
-      const blogId = document.getElementById('blogId').value;
-      const isEdit = !!blogId;
-      const title = document.getElementById('blogTitle').value.trim();
-      const slug = document.getElementById('blogSlug').value.trim();
-      const content = document.getElementById('blogContent').value.trim();
-
-      if (!title || !slug || !content) {
-        status.className = 'status error';
-        status.textContent = 'Title, slug, and content are required';
-        return;
-      }
-
-      const payload = {
-        title,
-        slug,
-        excerpt: document.getElementById('blogExcerpt').value || undefined,
-        content,
-        coverImage: document.getElementById('blogCoverImage').value || undefined,
-        published: document.getElementById('blogPublished').checked,
-      };
-
-      try {
-        const url = isEdit ? `${API_BASE}/blog/${blogId}` : `${API_BASE}/blog`;
-        const method = isEdit ? 'PUT' : 'POST';
-
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (res.status === 401) {
-          status.className = 'status error';
-          status.textContent = 'Unauthorized. Please login first.';
-          return;
-        }
-
-        const data = await res.json();
-        if (!res.ok) {
-          status.className = 'status error';
-          status.textContent = data.message || 'Failed to save blog post';
-          return;
-        }
-
-        status.className = 'status success';
-        status.textContent = isEdit ? 'Blog post updated successfully.' : 'Blog post saved successfully.';
-        resetBlogForm();
-        loadBlogPosts();
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = 'Error saving blog post';
-      }
-    }
-
-    async function editBlog(slug) {
-      try {
-        const res = await fetch(`${API_BASE}/blog/${slug}`);
-        const post = await res.json();
-        if (!res.ok) {
-          alert('Failed to load blog post: ' + (post.message || 'Unknown error'));
-          return;
-        }
-        document.getElementById('blogId').value = post.id;
-        document.getElementById('blogTitle').value = post.title || '';
-        document.getElementById('blogSlug').value = post.slug || '';
-        document.getElementById('blogExcerpt').value = post.excerpt || '';
-        document.getElementById('blogContent').value = post.content || '';
-        document.getElementById('blogCoverImage').value = post.coverImage || '';
-        document.getElementById('blogPublished').checked = post.published || false;
-        document.getElementById('blogSubmitBtn').textContent = 'Update Blog Post';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) {
-        alert('Error loading blog post for editing');
-      }
-    }
-
-    async function deleteBlog(id) {
-      if (!confirm('Delete this blog post?')) return;
-      try {
-        const res = await fetch(`${API_BASE}/blog/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.status === 401) {
-          alert('Unauthorized. Please login first.');
-          return;
-        }
-        if (!res.ok) {
-          const data = await res.json();
-          alert(data.message || 'Failed to delete blog post');
-          return;
-        }
-        loadBlogPosts();
-      } catch {
-        alert('Error deleting blog post');
-      }
-    }
-
-    function resetBlogForm() {
-      document.getElementById('blogTitle').value = '';
-      document.getElementById('blogSlug').value = '';
-      document.getElementById('blogExcerpt').value = '';
-      document.getElementById('blogContent').value = '';
-      document.getElementById('blogCoverImage').value = '';
-      document.getElementById('blogPublished').checked = false;
-      document.getElementById('blogId').value = '';
-      document.getElementById('blogStatus').textContent = '';
-      const submitBtn = document.getElementById('blogSubmitBtn');
-      if (submitBtn) submitBtn.textContent = 'Save Blog Post';
+    if (token) {
+      showAdmin();
+    } else {
+      document.getElementById('loginCard').classList.remove('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
     }
   </script>
 </body>

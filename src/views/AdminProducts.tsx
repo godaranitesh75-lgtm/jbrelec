@@ -91,7 +91,7 @@ export function AdminProducts() {
     loadCategories();
     loadBrands();
     loadProducts();
-  }, [user, navigate, loadBrands]);
+  }, [user, navigate]);
 
   async function loadCategories() {
     try {
