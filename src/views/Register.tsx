@@ -13,7 +13,7 @@ export function Register() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await api.post('/api/auth/register', { email, password, phone, name });
+      await api.post('/auth/register', { email, password, phone, name });
       navigate('/login');
     } catch {
       setError('Registration failed. Please check your input.');

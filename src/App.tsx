@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { GlobalSearchProvider } from './contexts/GlobalSearchContext.tsx';
 import { useGlobalSearch } from './hooks/use-global-search.ts';
+import { useAuth } from './hooks/use-auth.ts';
 
 interface Product {
   id: string;
@@ -57,6 +58,7 @@ function AppInner() {
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { query, setQuery } = useGlobalSearch();
+  const { user } = useAuth();
   const [quoteName, setQuoteName] = useState('');
   const [quotePhone, setQuotePhone] = useState('');
   const [quoteRequirement, setQuoteRequirement] = useState('');
@@ -321,6 +323,45 @@ function AppInner() {
 
   return (
     <div className="site-shell">
+      {/* Admin redirect banner - shown when an admin is browsing the public site */}
+      {user && (user.role === 'ADMIN' || user.role === 'STAFF') && (
+        <div style={{
+          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+          color: '#1c1917',
+          padding: '14px 5.5%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          fontWeight: 600,
+          fontSize: 13,
+          borderBottom: '2px solid rgba(0,0,0,.1)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <ShieldCheck size={18} />
+            <span>You are logged in as <strong>Administrator</strong>.</span>
+          </div>
+          <Link
+            to="/admin"
+            style={{
+              background: 'rgba(0,0,0,.15)',
+              color: '#1c1917',
+              padding: '8px 16px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              border: '1px solid rgba(0,0,0,.1)',
+            }}
+          >
+            Go to Admin Dashboard →
+          </Link>
+        </div>
+      )}
+      
       <div style={{ background: 'var(--navy)', color: 'white', textAlign: 'center', padding: '10px 18px', fontSize: 13, lineHeight: 1.5 }}>
         <strong>🚀 Full version launching 1st November 2026.</strong> For any inquiry, contact us on <a href="tel:6377374179" style={{ color: '#fbbf24', textDecoration: 'underline' }}>6377374179</a> or <a href="https://wa.me/916377374179" target="_blank" rel="noreferrer" style={{ color: '#fbbf24', textDecoration: 'underline' }}>WhatsApp</a>.
       </div>
