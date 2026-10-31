@@ -29,8 +29,8 @@ export function AdminLogin({ onSuccess }: Props) {
         return;
       }
       onSuccess();
-    } catch {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
